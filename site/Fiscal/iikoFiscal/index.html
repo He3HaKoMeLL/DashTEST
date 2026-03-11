@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>iikoFiscal · CTO Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+[data-theme="dark"]{
+  --bg:#07090e;--surface:#0d0f18;--card:#111520;--border:#1c2035;--b2:#272d48;
+  --accent:#3de8c0;--a2:#7c6eff;--danger:#ff4f62;--warn:#ffb330;--ok:#3de894;
+  --text:#dce2f0;--t2:#7a82a8;--t3:#313a5a;--sh:rgba(0,0,0,.6);
+  --glow:rgba(61,232,192,.07);--inp:#0a0c14;--red-bg:rgba(255,79,98,.12);
+}
+[data-theme="light"]{
+  --bg:#eef1f8;--surface:#fff;--card:#fff;--border:#dde2f0;--b2:#c8cfe6;
+  --accent:#0b9e78;--a2:#5248cc;--danger:#d93a4a;--warn:#c97000;--ok:#1a8a52;
+  --text:#18203a;--t2:#4e5878;--t3:#a8b0cc;--sh:rgba(0,0,0,.12);
+  --glow:rgba(11,158,120,.06);--inp:#f3f5fc;--red-bg:rgba(217,58,74,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:44px 44px;opacity:.3;pointer-events:none;z-index:0}
+
+/* ═══ LOGIN ═══ */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.login-box{background:var(--surface);border:1px solid var(--b2);border-radius:14px;padding:32px 28px;width:100%;max-width:370px;box-shadow:0 20px 50px var(--sh)}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.login-mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--a2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff}
+.login-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800}
+.login-sub{font-size:9px;color:var(--t3);letter-spacing:1px;margin-top:2px}
+.login-fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.login-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px}
+.login-inp{background:var(--inp)!important;border:1px solid var(--border)!important;border-radius:7px;color:var(--text)!important;font-family:'DM Mono',monospace;font-size:12px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s}
+.login-inp:focus{border-color:var(--accent)!important}
+.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),#3de894);color:#062018;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:4px;letter-spacing:.5px;transition:filter .15s}
+.login-btn:hover{filter:brightness(1.08)}
+.login-err{color:var(--danger);font-size:10px;margin-top:8px;display:none;padding:8px 10px;background:var(--red-bg);border-radius:6px;border:1px solid rgba(255,79,98,.2)}
+.login-err.show{display:block}
+
+/* ═══ LAYOUT ═══ */
+#app-screen{display:none;min-height:100vh}
+#app-screen.show{display:block}
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;transition:transform .3s,background .25s;overflow-y:auto}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;width:calc(100% - 220px)}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--a2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:.5px}
+.sb-ver{font-size:9px;color:var(--t3);letter-spacing:1px}
+.sb-user{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--glow)}
+.sb-uname{font-size:11px;font-weight:600}
+.sb-urole{font-size:9px;color:var(--t2);margin-top:2px}
+.nav{padding:6px 0;flex:1}
+.nav-section{font-size:9px;color:var(--t3);letter-spacing:2px;padding:10px 14px 4px;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:11px;color:var(--t2);cursor:pointer;border-left:2px solid transparent;transition:all .15s;user-select:none}
+.ni:hover{color:var(--text);background:var(--glow)}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--glow)}
+.ni.locked{opacity:.35;pointer-events:none}
+.ni-ico{width:25px;height:25px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.ni.active .ni-ico{background:rgba(61,232,192,.1);border-color:rgba(61,232,192,.25)}
+.sb-footer{padding:10px 14px;border-top:1px solid var(--border)}
+.conn-row{display:flex;align-items:center;gap:7px;font-size:10px;margin-bottom:8px}
+.cdot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 2.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.theme-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;cursor:pointer}
+.theme-sw{width:30px;height:16px;background:var(--b2);border-radius:8px;position:relative;transition:background .2s;flex-shrink:0}
+.theme-sw.on{background:var(--a2)}
+.theme-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s}
+.theme-sw.on::after{transform:translateX(14px)}
+.topbar{padding:0 22px;height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(7,9,14,.88);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50;width:100%}
+[data-theme="light"] .topbar{background:rgba(238,241,248,.9)}
+.tb-l{display:flex;align-items:center;gap:10px}
+.burger{display:none;width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;font-size:15px;align-items:center;justify-content:center}
+.page-ttl{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px}
+.bc{font-size:9px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.tb-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.time-b{font-size:10px;color:var(--t2);background:var(--card);border:1px solid var(--border);padding:5px 10px;border-radius:6px;white-space:nowrap}
+.content{padding:20px 22px;flex:1;width:100%}
+.panel{display:none;animation:fadeIn .2s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.card-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.card-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.card-body{padding:16px}
+.fg{display:flex;flex-direction:column;gap:5px}
+label,.flbl{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
+input,select,textarea{background:var(--inp);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:9px 12px;outline:none;transition:border-color .15s,background .15s;width:100%}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{color:#e8edff!important;background:#0c0f1e!important;border-color:#252d4a!important}
+[data-theme="dark"] input::placeholder,[data-theme="dark"] textarea::placeholder{color:#3d4666!important}
+[data-theme="dark"] input:focus,[data-theme="dark"] textarea:focus{color:#fff!important;background:#111425!important;border-color:#3de8c0!important}
+[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{color:#0a1128!important;background:#e2e7f5!important;border-color:#9aaace!important}
+[data-theme="light"] input::placeholder,[data-theme="light"] textarea::placeholder{color:#7080a8!important}
+[data-theme="light"] input:focus,[data-theme="light"] textarea:focus{color:#000820!important;background:#fff!important;border-color:#0b9e78!important}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:var(--card)}
+input.err{border-color:var(--danger)!important;background:var(--red-bg)!important}
+select option{background:var(--surface)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.fr1{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:7px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.8px;cursor:pointer;border:none;transition:all .15s;font-weight:600;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#3de894);color:#062018;font-weight:700}
+.btn-primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+.btn-a2{background:linear-gradient(135deg,var(--a2),#9c8fff);color:#fff}
+.btn-a2:hover:not(:disabled){filter:brightness(1.1)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(255,79,98,.3)}
+.btn-danger:hover:not(:disabled){background:rgba(255,79,98,.08)}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){border-color:var(--b2);color:var(--text)}
+.btn-warn{background:rgba(255,179,48,.12);color:var(--warn);border:1px solid rgba(255,179,48,.3)}
+.btn-gs{background:rgba(66,133,244,.1);color:#4285f4;border:1px solid rgba(66,133,244,.3)}
+.btn-gs:hover:not(:disabled){background:rgba(66,133,244,.2)}
+.btn-sm{padding:5px 11px;font-size:9px}
+.btn-full{width:100%;justify-content:center}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:9px;white-space:nowrap}
+.b-teal{background:rgba(61,232,192,.1);color:var(--accent);border:1px solid rgba(61,232,192,.22)}
+.b-a2{background:rgba(124,110,255,.1);color:var(--a2);border:1px solid rgba(124,110,255,.22)}
+.b-red{background:rgba(255,79,98,.1);color:var(--danger);border:1px solid rgba(255,79,98,.22)}
+.b-warn{background:rgba(255,179,48,.1);color:var(--warn);border:1px solid rgba(255,179,48,.22)}
+.b-muted{background:rgba(74,82,112,.08);color:var(--t2);border:1px solid var(--border)}
+.b-ok{background:rgba(61,232,148,.1);color:var(--ok);border:1px solid rgba(61,232,148,.22)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
+th{text-align:left;padding:9px 13px;color:var(--t2);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--glow)}
+.addr-row{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:border-color .2s}
+.addr-row:hover{border-color:var(--b2)}
+.addr-num{width:22px;height:22px;border-radius:50%;background:var(--a2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.addr-inp{flex:1;background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none}
+.addr-inp::placeholder{color:var(--t3)}
+.ktabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;flex-shrink:0}
+.ktab{padding:9px 14px;font-size:10px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.ktab:hover{color:var(--text)}
+.ktab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.ktab.err{color:var(--danger);border-bottom-color:var(--danger)}
+.kpanel{display:none}.kpanel.active{display:block;animation:fadeIn .2s ease}
+.addr-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--border);margin-bottom:16px}
+.atab{padding:9px 16px;font-size:11px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.atab:hover{color:var(--text)}
+.atab.active{color:var(--a2);border-bottom-color:var(--a2)}
+.check-box{border-radius:8px;padding:12px 14px;margin-top:10px;font-size:11px;line-height:1.8;display:none}
+.check-box.show{display:block}
+.check-box.ok{background:rgba(61,232,148,.08);border:1px solid rgba(61,232,148,.2);color:var(--ok)}
+.check-box.warn{background:rgba(255,79,98,.08);border:1px solid rgba(255,79,98,.2);color:var(--danger)}
+.check-box.conflict{background:rgba(255,179,48,.08);border:1px solid rgba(255,179,48,.2);color:var(--warn)}
+.inn-results{background:var(--surface);border:1px solid var(--b2);border-radius:8px;margin-top:4px;max-height:180px;overflow-y:auto;display:none}
+.inn-row{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:11px;transition:background .1s}
+.inn-row:hover{background:var(--glow)}
+.inn-row:last-child{border-bottom:none}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:14px 16px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:9px 9px 0 0}
+.sa::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.sb2::before{background:linear-gradient(90deg,var(--a2),transparent)}
+.sc::before{background:linear-gradient(90deg,var(--warn),transparent)}
+.sd::before{background:linear-gradient(90deg,var(--ok),transparent)}
+.stat-ico{font-size:18px;margin-bottom:8px}
+.stat-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.notice{background:rgba(124,110,255,.06);border:1px solid rgba(124,110,255,.18);border-radius:8px;padding:11px 14px;font-size:11px;color:var(--t2);line-height:1.7;margin-bottom:12px}
+.notice strong{color:var(--a2)}
+.notice.ok{background:rgba(61,232,192,.06);border-color:rgba(61,232,192,.2)}
+.notice.ok strong{color:var(--accent)}
+.notice.warn{background:rgba(255,179,48,.06);border-color:rgba(255,179,48,.2)}
+.notice.warn strong{color:var(--warn)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:14px}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--b2);border-radius:12px;padding:22px;width:100%;max-width:520px;box-shadow:0 20px 50px var(--sh);animation:mIn .2s ease;max-height:90vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* ═══ STEPS — кликабельные ═══ */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:22px;padding:14px 16px;background:var(--bg);border-radius:9px;border:1px solid var(--border);overflow-x:auto}
+.step{display:flex;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;padding:4px 6px;border-radius:7px;transition:background .15s}
+.step:hover{background:var(--glow)}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid var(--border);color:var(--t3);transition:all .2s}
+.step.done .step-num{background:var(--accent);border-color:var(--accent);color:#062018}
+.step.active .step-num{background:var(--a2);border-color:var(--a2);color:#fff;box-shadow:0 0 10px rgba(124,110,255,.4)}
+.step-lbl{font-size:10px;color:var(--t3);white-space:nowrap;transition:color .2s}
+.step.done .step-lbl,.step.active .step-lbl{color:var(--text)}
+.step.done:hover .step-lbl{color:var(--accent)}
+.step-line{flex:1;height:2px;background:var(--border);min-width:16px;transition:background .3s}
+.step-line.done{background:var(--accent)}
+.step-hint{font-size:8px;color:var(--t3);margin-top:2px;white-space:nowrap}
+.step.done .step-hint{color:var(--accent);opacity:.7}
+
+/* ═══ HISTORY ROW ═══ */
+.hist-entry{background:rgba(255,179,48,.04);border:1px solid rgba(255,179,48,.15);border-radius:7px;padding:10px 12px;margin-bottom:7px;font-size:10px}
+.hist-entry .hist-date{color:var(--warn);font-weight:600;margin-bottom:3px}
+.hist-entry .hist-reason{color:var(--t2);font-style:italic}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:16px;right:16px;background:var(--surface);border:1px solid var(--b2);border-radius:9px;padding:11px 16px;font-size:11px;display:flex;align-items:center;gap:9px;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s;pointer-events:none;max-width:300px;box-shadow:0 8px 22px var(--sh)}
+#toast.show{transform:translateY(0);opacity:1}
+.loading{display:flex;align-items:center;justify-content:center;gap:7px;padding:28px;color:var(--t3);font-size:11px}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:36px;color:var(--t3);font-size:11px}
+.empty-ico{font-size:28px;display:block;margin-bottom:10px;opacity:.4}
+@media(max-width:900px){.stats4{grid-template-columns:1fr 1fr}.fr3{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}.burger{display:flex}
+  .fr2,.fr3{grid-template-columns:1fr}.topbar{padding:0 12px}.content{padding:12px}
+  .stats4{grid-template-columns:1fr 1fr}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90}
+  .overlay.show{display:block}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-mark">iF</div>
+      <div>
+        <div class="login-title">iikoFiscal</div>
+        <div class="login-sub">CTO PANEL v2.0</div>
+      </div>
+    </div>
+    <div class="login-fg"><label class="login-lbl">Логин</label><input class="login-inp" id="l-user" placeholder="username" autocomplete="username"></div>
+    <div class="login-fg"><label class="login-lbl">Пароль</label><input class="login-inp" id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Войти →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app-screen">
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark">iF</div>
+    <div><div class="sb-name">iikoFiscal</div><div class="sb-ver">CTO PANEL v2.0</div></div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-uname" id="sb-uname">—</div>
+    <div class="sb-urole" id="sb-urole">—</div>
+  </div>
+  <nav class="nav" id="main-nav">
+    <div class="nav-section">Регистрация</div>
+    <div class="ni" id="ni-new" onclick="goPanel('new')"><div class="ni-ico">➕</div>Новая запись</div>
+    <div class="ni" id="ni-registry" onclick="goPanel('registry')"><div class="ni-ico">📋</div>Реестр договоров</div>
+    <div class="nav-section">Оборудование</div>
+    <div class="ni" id="ni-sn" onclick="goPanel('sn')"><div class="ni-ico">📦</div>Реестр ФМ / S/N</div>
+    <div class="nav-section">Система</div>
+    <div class="ni" id="ni-gs" onclick="goPanel('gs')"><div class="ni-ico">📊</div>Google Sheets</div>
+  </nav>
+  <div class="sb-footer">
+    <div class="conn-row"><div class="cdot" id="cdot"></div><span style="color:var(--t2);font-size:10px;flex:1" id="conn-txt">Подключение...</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:7px">
+      <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center" onclick="doLogout()">↩ Выйти</button>
+    </div>
+    <div class="theme-row" onclick="toggleTheme()">
+      <span id="t-ico">🌙</span>
+      <span style="font-size:10px;color:var(--t2);flex:1" id="t-lbl">Тёмная</span>
+      <div class="theme-sw on" id="t-sw"></div>
+    </div>
+  </div>
+</aside>
+<div class="overlay" id="overlay" onclick="closeSb()"></div>
+
+<div class="main" id="main">
+  <div class="topbar">
+    <div class="tb-l">
+      <button class="burger" onclick="toggleSb()">☰</button>
+      <div>
+        <div class="page-ttl" id="page-ttl">iikoFiscal</div>
+        <div class="bc"><span>iikoFiscal</span><span style="color:var(--t3)">›</span><span style="color:var(--accent)" id="bc-cur">—</span></div>
+      </div>
+    </div>
+    <div class="tb-r">
+      <div class="time-b" id="top-time">—</div>
+      <button class="btn btn-ghost btn-sm" onclick="clearForm()">🗑 Очистить</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ════ NEW REGISTRATION ════ -->
+    <div class="panel" id="pn-new">
+
+      <!-- CLICKABLE STEPS -->
+      <div class="steps" id="steps-bar">
+        <div class="step active" id="st0" onclick="jumpToStep(0)" title="Кликните для перехода">
+          <div class="step-num">1</div>
+          <div><div class="step-lbl">Договор</div><div class="step-hint">Реквизиты</div></div>
+        </div>
+        <div class="step-line" id="sl0"></div>
+        <div class="step" id="st1" onclick="jumpToStep(1)" title="Кликните для перехода">
+          <div class="step-num">2</div>
+          <div><div class="step-lbl">Адреса</div><div class="step-hint">Точки</div></div>
+        </div>
+        <div class="step-line" id="sl1"></div>
+        <div class="step" id="st2" onclick="jumpToStep(2)" title="Кликните для перехода">
+          <div class="step-num">3</div>
+          <div><div class="step-lbl">Кассы</div><div class="step-hint">S/N и ФМ</div></div>
+        </div>
+        <div class="step-line" id="sl2"></div>
+        <div class="step" id="st3" onclick="jumpToStep(3)" title="Кликните для перехода">
+          <div class="step-num">4</div>
+          <div><div class="step-lbl">Сохранение</div><div class="step-hint">Итог</div></div>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step-contract">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📄 Данные договора</span>
+            <button class="btn btn-ghost btn-sm" onclick="openInnSearch()">🔍 Поиск по ИНН</button>
+          </div>
+          <div class="card-body">
+            <div class="fr2">
+              <div class="fg"><label>Номер договора *</label><input id="c-number" placeholder="2025-001"></div>
+              <div class="fg"><label>Дата договора *</label><input id="c-date" type="date"></div>
+            </div>
+            <div class="fr2">
+              <div class="fg"><label>Телефон *</label><input id="c-phone" placeholder="+998 90 000 00 00"></div>
+              <div class="fg"><label>ИНН *</label><input id="c-inn" placeholder="123456789"></div>
+            </div>
+            <div class="fr2">
+              <div class="fg"><label>Название фирмы *</label><input id="c-firm" placeholder="ООО ..."></div>
+              <div class="fg"><label>Название компании *</label><input id="c-company" placeholder="Торговая точка"></div>
+            </div>
+            <div class="fr2">
+              <div class="fg"><label>Директор (Ф.И.О.) *</label><input id="c-director" placeholder="Иванов Иван Иванович"></div>
+              <div class="fg"><label>НДС</label><input id="c-nds" placeholder="Нет / % ставка"></div>
+            </div>
+            <div class="fr1"><div class="fg"><label>Юридический адрес *</label><input id="c-legal" placeholder="г. Ташкент, ул. ..."></div></div>
+            <div class="fr3">
+              <div class="fg"><label>Банк *</label><input id="c-bank" placeholder="Название банка"></div>
+              <div class="fg"><label>МФО *</label><input id="c-mfo" placeholder="00000"></div>
+              <div class="fg"><label>Расч. счёт *</label><input id="c-account" placeholder="20208000000000000000"></div>
+            </div>
+            <div class="fr2">
+              <div class="fg"><label>ОКЕД *</label><input id="c-oked" placeholder="00000"></div>
+              <div class="fg"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="goStep1()">Далее → Адреса</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step-addresses" style="display:none">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📍 Адреса и кассы</span>
+            <button class="btn btn-primary btn-sm" onclick="addAddr()">+ Адрес</button>
+          </div>
+          <div class="card-body">
+            <div class="notice"><strong>Укажите адрес</strong> и количество касс для каждой точки. Максимум 10 адресов.</div>
+            <div style="display:grid;grid-template-columns:1fr 80px 36px;gap:8px;margin-bottom:8px;padding:0 14px">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px">Адрес</span>
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;text-align:center">Кассы</span>
+              <span></span>
+            </div>
+            <div id="addr-container"></div>
+            <button class="btn btn-ghost btn-sm" onclick="addAddr()" style="margin-top:4px">+ Ещё адрес</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <button class="btn btn-ghost" onclick="jumpToStep(0)">← Назад</button>
+          <button class="btn btn-primary" onclick="goStep2()">Далее → Кассы</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="step-kass" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">🖥️ Данные касс</span></div>
+          <div class="card-body" id="kass-body"><div class="loading"><span class="spin">◌</span></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:14px">
+          <button class="btn btn-ghost" onclick="jumpToStep(1)">← Назад</button>
+          <button class="btn btn-primary" onclick="goStep3()">Далее → Сохранение</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div id="step-save" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">✅ Итог и сохранение</span></div>
+          <div class="card-body" id="save-preview"></div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="notice ok"><strong>Данные будут сохранены</strong> в Supabase и Google Sheets.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+              <button class="btn btn-primary" onclick="saveAll()" id="save-btn">💾 Сохранить в базу</button>
+              <button class="btn btn-ghost" onclick="jumpToStep(2)">← Назад</button>
+              <span id="save-status" style="font-size:10px;color:var(--t2);align-self:center"></span>
+            </div>
+            <div style="padding-top:12px;border-top:1px solid var(--border)">
+              <div class="notice ok" style="margin-bottom:10px">PDF: договор + Приложения + заявления на каждую кассу.</div>
+              <button class="btn btn-warn" onclick="downloadAllPDF()" id="pdf-btn">📄 Скачать PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pn-new -->
+
+    <!-- ════ REGISTRY ════ -->
+    <div class="panel" id="pn-registry">
+      <div class="stats4">
+        <div class="stat sa"><div class="stat-ico">📄</div><div class="stat-lbl">Договоров</div><div class="stat-val" id="rs-contracts">—</div></div>
+        <div class="stat sb2"><div class="stat-ico">🖥️</div><div class="stat-lbl">Касс</div><div class="stat-val" id="rs-kass">—</div></div>
+        <div class="stat sc"><div class="stat-ico">✅</div><div class="stat-lbl">В работе</div><div class="stat-val" id="rs-active">—</div></div>
+        <div class="stat sd"><div class="stat-ico">🏢</div><div class="stat-lbl">Компаний</div><div class="stat-val" id="rs-companies">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">📋 Реестр договоров</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input id="reg-q" placeholder="🔍 Поиск..." style="width:190px" oninput="filterReg()">
+            <button class="btn btn-ghost btn-sm" onclick="loadRegistry()">↻</button>
+          </div>
+        </div>
+        <div class="tbl-wrap" id="reg-wrap"><div class="loading"><span class="spin">◌</span></div></div>
+      </div>
+    </div>
+
+    <!-- ════ SN REGISTRY ════ -->
+    <div class="panel" id="pn-sn">
+
+      <!-- Проверка -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">🔍 Быстрая проверка S/N и ФМ</span></div>
+        <div class="card-body">
+          <div class="fr2">
+            <div class="fg"><label>Серийный номер (S/N)</label><input id="sn-sn" placeholder="Введите S/N..."></div>
+            <div class="fg"><label>Фискальный модуль (ФМ)</label><input id="sn-fm" placeholder="Введите ФМ..."></div>
+          </div>
+          <button class="btn btn-primary" onclick="checkSN()">🔍 Проверить</button>
+          <div class="check-box" id="check-result"></div>
+        </div>
+      </div>
+
+      <!-- Таб-навигация -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
+        <div class="sntab active" id="sntab-sn" onclick="switchSnTab('sn')" style="padding:10px 18px;font-size:11px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s">📦 Реестр S/N</div>
+        <div class="sntab" id="sntab-fm" onclick="switchSnTab('fm')" style="padding:10px 18px;font-size:11px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s">🔷 Реестр ФМ</div>
+      </div>
+
+      <!-- S/N таблица -->
+      <div id="snpanel-sn">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📦 Серийные номера (S/N)</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <input id="sn-q-sn" placeholder="🔍 Поиск S/N..." style="width:170px" oninput="filterSNTab('sn')">
+              <select id="sn-busy-sn" onchange="filterSNTab('sn')" style="width:140px">
+                <option value="">Все статусы</option>
+                <option value="Активный">✅ Активный</option>
+                <option value="Деактивирован">❌ Деактивирован</option>
+                <option value="В работе">⚙️ В работе</option>
+                <option value="Утеря">🔍 Утеря</option>
+                <option value="Порча">💔 Порча</option>
+                <option value="0">🟢 Свободные</option>
+                <option value="1">🔴 Занятые</option>
+              </select>
+              <button class="btn btn-a2 btn-sm" id="btn-add-sn" style="display:none" onclick="openAddRecord('sn')">+ Добавить S/N</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadSNRegistry()">↻</button>
+            </div>
+          </div>
+          <div class="tbl-wrap" id="sn-wrap-sn"><div class="loading"><span class="spin">◌</span></div></div>
+        </div>
+      </div>
+
+      <!-- FM таблица -->
+      <div id="snpanel-fm" style="display:none">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">🔷 Фискальные модули (ФМ)</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <input id="sn-q-fm" placeholder="🔍 Поиск ФМ..." style="width:170px" oninput="filterSNTab('fm')">
+              <select id="sn-busy-fm" onchange="filterSNTab('fm')" style="width:140px">
+                <option value="">Все статусы</option>
+                <option value="Активный">✅ Активный</option>
+                <option value="Деактивирован">❌ Деактивирован</option>
+                <option value="В работе">⚙️ В работе</option>
+                <option value="Утеря">🔍 Утеря</option>
+                <option value="Порча">💔 Порча</option>
+                <option value="0">🟢 Свободные</option>
+                <option value="1">🔴 Занятые</option>
+              </select>
+              <button class="btn btn-a2 btn-sm" id="btn-add-fm" style="display:none" onclick="openAddRecord('fm')">+ Добавить ФМ</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadSNRegistry()">↻</button>
+            </div>
+          </div>
+          <div class="tbl-wrap" id="sn-wrap-fm"><div class="loading"><span class="spin">◌</span></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════ GOOGLE SHEETS ════ -->
+    <div class="panel" id="pn-gs">
+      <div class="card">
+        <div class="card-head"><span class="card-title">📊 Google Sheets — прямая интеграция</span></div>
+        <div class="card-body">
+
+          <!-- Apps Script URL -->
+          <div style="background:var(--bg);border:1px solid var(--b2);border-radius:9px;padding:14px;margin-bottom:14px">
+            <div style="font-size:11px;font-weight:600;margin-bottom:8px">🔗 Google Apps Script URL</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="apps-script-url" placeholder="https://script.google.com/macros/s/..." style="flex:1"
+                value="" oninput="APPS_SCRIPT_URL=this.value;localStorage.setItem('if_apps_script_url',this.value)">
+              <button class="btn btn-ghost btn-sm" onclick="testAppsScript()">🔌 Тест</button>
+              <button class="btn btn-ghost btn-sm" onclick="showAppsScriptInstructions()">❓</button>
+            </div>
+            <div id="apps-script-status" style="font-size:10px;color:var(--t2);margin-top:6px">
+              Без URL — экспорт через CSV, импорт через загрузку файла.
+            </div>
+            <!-- Названия листов -->
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">📋 Названия листов в Google Таблице</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="fg">
+                  <label>Лист реестра договоров</label>
+                  <input id="gs-sheet-reg" placeholder="iikoFiscal"
+                    oninput="GS_SHEET_REG=this.value;localStorage.setItem('if_sheet_reg',this.value)">
+                </div>
+                <div class="fg">
+                  <label>Лист реестра ФМ/S/N</label>
+                  <input id="gs-sheet-sn" placeholder="S/N"
+                    oninput="GS_SHEET_SN=this.value;localStorage.setItem('if_sheet_sn',this.value)">
+                </div>
+              </div>
+              <div style="font-size:9px;color:var(--t3);margin-top:6px">💡 Укажите точные названия листов (вкладок) из вашей Google Таблицы</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <!-- Реестр договоров -->
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:14px">
+              <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;margin-bottom:10px">📋 Реестр договоров</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <button class="btn btn-gs btn-full" onclick="exportToGS('registry')" id="gs-exp-reg">↑ Отправить в Google Sheets</button>
+                <div>
+                  <button class="btn btn-full" style="background:rgba(52,168,83,.1);color:#34a853;border:1px solid rgba(52,168,83,.3)"
+                    onclick="APPS_SCRIPT_URL ? importFromGSdirect('registry') : document.getElementById('gs-imp-reg').click()">
+                    ↓ Получить из Google Sheets
+                  </button>
+                  <input type="file" id="gs-imp-reg" accept=".csv" style="display:none" onchange="importFromGS('registry',this)">
+                </div>
+              </div>
+              <div id="gs-status-reg" style="font-size:10px;color:var(--t2);margin-top:8px"></div>
+            </div>
+            <!-- Реестр ФМ/SN -->
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:14px">
+              <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;margin-bottom:10px">📦 Реестр ФМ / S/N</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <button class="btn btn-gs btn-full" onclick="exportToGS('sn')" id="gs-exp-sn">↑ Отправить в Google Sheets</button>
+                <div>
+                  <button class="btn btn-full" style="background:rgba(52,168,83,.1);color:#34a853;border:1px solid rgba(52,168,83,.3)"
+                    onclick="APPS_SCRIPT_URL ? importFromGSdirect('sn') : document.getElementById('gs-imp-sn').click()">
+                    ↓ Получить из Google Sheets
+                  </button>
+                  <input type="file" id="gs-imp-sn" accept=".csv" style="display:none" onchange="importFromGS('sn',this)">
+                </div>
+              </div>
+              <div id="gs-status-sn" style="font-size:10px;color:var(--t2);margin-top:8px"></div>
+            </div>
+          </div>
+
+          <!-- История -->
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">История синхронизаций</div>
+            <div id="gs-history" style="font-size:10px;color:var(--t2)">Нет данных</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+</div><!-- /app-screen -->
+
+<!-- INN SEARCH -->
+<div class="modal-bg" id="mo-inn">
+  <div class="modal">
+    <div class="modal-title">🔍 Поиск по ИНН</div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>Введите ИНН</label>
+      <input id="inn-search-inp" placeholder="123456789" oninput="searchINN()">
+    </div>
+    <div id="inn-results" class="inn-results"></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('mo-inn')">Закрыть</button></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT SN or FM — только одно поле -->
+<div class="modal-bg" id="mo-sn">
+  <div class="modal">
+    <div class="modal-title" id="mo-sn-title">➕ Добавить S/N</div>
+    <input type="hidden" id="sn-edit-id">
+    <input type="hidden" id="sn-edit-type"> <!-- 'sn' or 'fm' -->
+    <div class="fg" style="margin-bottom:12px" id="sn-edit-sn-row">
+      <label>Серийный номер (S/N) *</label>
+      <textarea id="sn-edit-sn" rows="5" placeholder="Один S/N — одна строка. Можно вставить список через пробел или перенос строки:&#10;YZ231006012301&#10;YZ231006012302&#10;YZ231006012303" style="font-family:monospace;font-size:11px;resize:vertical"></textarea>
+      <div class="sn-hint" style="font-size:9px;color:var(--t3);margin-top:4px">💡 Вставьте несколько значений — каждое будет добавлено отдельной строкой</div>
+    </div>
+    <div class="fg" style="margin-bottom:12px" id="sn-edit-fm-row">
+      <label>Фискальный модуль (ФМ) *</label>
+      <textarea id="sn-edit-fm" rows="5" placeholder="Один ФМ — одна строка. Можно вставить список через пробел или перенос строки:&#10;LG420230638503&#10;LG420230638504&#10;LG420230638505" style="font-family:monospace;font-size:11px;resize:vertical"></textarea>
+      <div class="sn-hint" style="font-size:9px;color:var(--t3);margin-top:4px">💡 Вставьте несколько значений — каждое будет добавлено отдельной строкой</div>
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Комментарий (для всех)</label><input id="sn-edit-comment" placeholder="Примечание (необязательно)..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mo-sn')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveSNRecord()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPLACE SN/FM — привязан к компании -->
+<div class="modal-bg" id="mo-replace">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">🔄 Замена оборудования</div>
+    <input type="hidden" id="rep-kass-id">
+    <!-- Текущие данные кассы -->
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:11px">
+      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Текущая касса</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div><span style="color:var(--t2)">Компания: </span><span id="rep-company" style="color:var(--text);font-weight:600"></span></div>
+        <div><span style="color:var(--t2)">Договор: </span><span id="rep-contract" style="color:var(--accent)"></span></div>
+        <div><span style="color:var(--t2)">Касса: </span><span id="rep-kassnum"></span></div>
+        <div><span style="color:var(--t2)">Адрес: </span><span id="rep-addr" style="color:var(--t2)"></span></div>
+        <div><span style="color:var(--danger)">Текущий S/N: </span><code id="rep-old-sn" style="color:var(--warn)"></code></div>
+        <div><span style="color:var(--danger)">Текущий ФМ: </span><code id="rep-old-fm" style="color:var(--warn)"></code></div>
+      </div>
+    </div>
+    <!-- Что меняем -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px">
+        <input type="checkbox" id="rep-change-sn" onchange="toggleRepFields()"> <span>Заменить S/N</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px">
+        <input type="checkbox" id="rep-change-fm" onchange="toggleRepFields()"> <span>Заменить ФМ</span>
+      </label>
+    </div>
+    <div id="rep-sn-row" style="display:none;margin-bottom:10px" class="fg">
+      <label>Новый S/N</label><input id="rep-sn" placeholder="Введите новый серийный номер">
+    </div>
+    <div id="rep-fm-row" style="display:none;margin-bottom:10px" class="fg">
+      <label>Новый ФМ</label><input id="rep-fm" placeholder="Введите новый фискальный модуль">
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Дата замены *</label><input id="rep-date" type="date"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Причина замены *</label>
+      <textarea id="rep-reason" rows="2" placeholder="Физическое повреждение, истёк срок, утеря..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mo-replace')">Отмена</button>
+      <button class="btn btn-warn" onclick="saveReplace()">🔄 Выполнить замену</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- HISTORY MODAL -->
+<div class="modal-bg" id="mo-history">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-title">📋 История замен</div>
+    <div id="history-body"><div class="loading"><span class="spin">◌</span></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('mo-history')">Закрыть</button></div>
+  </div>
+</div>
+
+<!-- EDIT KASS RECORD MODAL -->
+<div class="modal-bg" id="mo-edit-kass">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title">✏️ Редактировать запись реестра</div>
+    <input type="hidden" id="ek-id">
+    <div class="fr2">
+      <div class="fg"><label>Договор №</label><input id="ek-contract-number" placeholder="2025-001"></div>
+      <div class="fg"><label>Дата договора</label><input id="ek-contract-date" type="date"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Телефон</label><input id="ek-phone" placeholder="+998..."></div>
+      <div class="fg"><label>ИНН</label><input id="ek-inn" placeholder="123456789"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Фирма</label><input id="ek-firm" placeholder="ООО ..."></div>
+      <div class="fg"><label>Компания / Точка</label><input id="ek-company" placeholder="Название точки"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Директор</label><input id="ek-director" placeholder="Ф.И.О."></div>
+      <div class="fg"><label>Касса №</label><input id="ek-kass-number" placeholder="Касса 1.1"></div>
+    </div>
+    <div class="fr1"><div class="fg" style="margin-bottom:10px"><label>Адрес</label><input id="ek-address" placeholder="ул. ..."></div></div>
+    <div class="fr2">
+      <div class="fg"><label>S/N</label><input id="ek-sn" placeholder="Серийный номер"></div>
+      <div class="fg"><label>Фискальный модуль</label><input id="ek-fm" placeholder="ФМ номер"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Заведение</label><input id="ek-venue" placeholder="Название заведения"></div>
+      <div class="fg"><label>ГНИ</label><input id="ek-gni" placeholder="Код ГНИ"></div>
+    </div>
+    <div class="fr3">
+      <div class="fg"><label>Банк</label><input id="ek-bank" placeholder="Банк"></div>
+      <div class="fg"><label>МФО</label><input id="ek-mfo" placeholder="МФО"></div>
+      <div class="fg"><label>Р/с</label><input id="ek-account" placeholder="20208..."></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>ОКЭД</label><input id="ek-oked" placeholder="62020"></div>
+      <div class="fg"><label>НДС</label><input id="ek-nds" placeholder="Нет / %"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Адаптер</label><input id="ek-adapter" placeholder="Модель адаптера"></div>
+      <div class="fg">
+        <label>Статус</label>
+        <select id="ek-status">
+          <option value="В работе">⚙️ В работе</option>
+          <option value="Активный">✅ Активный</option>
+          <option value="Деактивирован">❌ Деактивирован</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mo-edit-kass')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveKassRecord()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SN/FM RECORD MODAL (все поля GS) -->
+<div class="modal-bg" id="mo-edit-sn-full">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">✏️ Редактировать запись S/N</div>
+    <input type="hidden" id="esn-id">
+    <div class="fr2">
+      <div class="fg"><label>S/N</label><input id="esn-sn" placeholder="Серийный номер"></div>
+      <div class="fg"><label>Фискальный Модуль/KKM</label><input id="esn-fm" placeholder="ФМ номер"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>ИНН</label><input id="esn-inn" placeholder="123456789"></div>
+      <div class="fg"><label>Договор</label><input id="esn-contract" placeholder="2025-001"></div>
+    </div>
+    <div class="fr1"><div class="fg" style="margin-bottom:10px"><label>Заведение</label><input id="esn-venue" placeholder="Название заведения"></div></div>
+    <div class="fr2">
+      <div class="fg">
+        <label>Статус</label>
+        <select id="esn-status">
+          <option value="">— не задан —</option>
+          <option value="Активный">✅ Активный</option>
+          <option value="Деактивирован">❌ Деактивирован</option>
+          <option value="В работе">⚙️ В работе</option>
+          <option value="Утеря">🔍 Утеря</option>
+          <option value="Порча">💔 Порча</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Активность</label>
+        <select id="esn-activity">
+          <option value="">— не задана —</option>
+          <option value="Активный">✅ Активный</option>
+          <option value="Деактивирован">❌ Деактивирован</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Статус в Налогово</label><input id="esn-tax-status" placeholder="Статус в ГНС"></div>
+      <div class="fg">
+        <label>Занят</label>
+        <select id="esn-busy">
+          <option value="false">🟢 Свободен</option>
+          <option value="true">🔴 Занят</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Комментарий</label><textarea id="esn-comment" rows="2" placeholder="Примечание..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mo-edit-sn-full')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveSNFullRecord()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="t-ico2" style="font-size:14px"></span><span id="t-msg"></span></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const SB = "https://vtsmymfvavlbrqslomji.supabase.co";
+const SK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c215bWZ2YXZsYnJxc2xvbWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNjEwMTAsImV4cCI6MjA4ODYzNzAxMH0.uKPyBy5gCna9duwusvZoOp-mr_crL1V29AQWuvuHNQ4";
+const SH = {"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"};
+
+async function db(m,t,q="",b=null){
+  const o={method:m,headers:SH};
+  if(b)o.body=JSON.stringify(b);
+  const r=await fetch(SB+"/rest/v1/"+t+(q?"?"+q:""),o);
+  if(!r.ok){const e=await r.text();throw new Error(e);}
+  if(m==="DELETE"||r.status===204)return[];
+  return r.json();
+}
+
+// ═══════════════════════════════════════════════
+// AUTH + PERMISSIONS
+// ═══════════════════════════════════════════════
+let ME = null;
+
+// Права модулей:
+// fiscal_reg   — создание новых договоров
+// fiscal_view  — просмотр реестров
+// fiscal_sn    — управление реестром ФМ/SN
+// fiscal_gs    — синхронизация с Google Sheets
+// admin        — полный доступ ко всему
+
+// Проверка пароля — поддерживает 3 формата:
+// 1) "salt:sha256hex" (IF_SALT_2025) — наш формат
+// 2) "salt:sha256hex" (KS_SALT_2025) — combined.html формат
+// 3) plain text (старые записи)
+async function verifyPw(pw, stored){
+  if(!stored) return false;
+  // Plain text
+  if(!stored.includes(':')) return pw === stored;
+  const [salt, hash] = stored.split(':');
+  // Try IF salt
+  let enc = new TextEncoder().encode(salt + pw + "IF_SALT_2025");
+  let buf = await crypto.subtle.digest("SHA-256", enc);
+  let hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  if(hex === hash) return true;
+  // Try KS salt (combined.html совместимость)
+  enc = new TextEncoder().encode(salt + pw + "KS_SALT_2025");
+  buf = await crypto.subtle.digest("SHA-256", enc);
+  hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return hex === hash;
+}
+
+async function doLogin(){
+  const user = document.getElementById("l-user").value.trim();
+  const pass = document.getElementById("l-pass").value;
+  if(!user||!pass){showLoginErr("Введите логин и пароль");return;}
+  const errEl=document.getElementById("login-err");
+  errEl.textContent="⏳ Вход...";errEl.classList.add("show");
+  try{
+    const rows=await db("GET","operators","select=*&login=eq."+encodeURIComponent(user));
+    if(!rows.length){showLoginErr("Неверный логин или пароль");return;}
+    const op=rows[0];
+    if(!op.password_hash){showLoginErr("Пароль не задан. Обратитесь к администратору.");return;}
+    const ok=await verifyPw(pass,op.password_hash);
+    if(!ok){showLoginErr("Неверный логин или пароль");return;}
+    // Загрузка прав из operator_permissions (общая база с combined.html)
+    const perms={};
+    if(op.is_admin){
+      ["fiscal_reg","fiscal_view","fiscal_sn","fiscal_gs","admin"].forEach(m=>perms[m]=true);
+    } else {
+      const pr=await db("GET","operator_permissions","select=*&operator_id=eq."+op.id).catch(()=>[]);
+      (pr||[]).forEach(p=>{
+        if(p.can_view||p.can_edit||p.can_admin) perms[p.module]=true;
+        // Маппинг модулей combined.html → fiscal
+        if(p.module==='fiscal_new'&&(p.can_edit||p.can_admin)) perms['fiscal_reg']=true;
+        if(p.module==='fiscal_registry'&&(p.can_view||p.can_edit)) perms['fiscal_view']=true;
+        if(p.module==='fiscal_sn'&&(p.can_view||p.can_edit)) perms['fiscal_sn']=true;
+      });
+      // Google Sheets доступен если есть хоть одно fiscal право
+      if(perms.fiscal_reg||perms.fiscal_view||perms.fiscal_sn) perms['fiscal_gs']=true;
+    }
+    ME={id:op.id,name:((op.first_name||"")+" "+(op.last_name||"")).trim(),is_admin:!!op.is_admin,perms};
+    localStorage.setItem("if_session",JSON.stringify({id:op.id}));
+    showApp();
+  }catch(e){showLoginErr("Ошибка подключения: "+e.message.slice(0,50));}
+}
+
+function showLoginErr(msg){
+  const el=document.getElementById("login-err");
+  el.textContent=msg;el.classList.add("show");
+}
+
+function doLogout(){
+  ME=null;localStorage.removeItem("if_session");
+  document.getElementById("app-screen").classList.remove("show");
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("l-pass").value="";
+  document.getElementById("login-err").classList.remove("show");
+}
+
+async function tryAutoLogin(){
+  const s=localStorage.getItem("if_session");
+  if(!s)return false;
+  try{
+    const {id}=JSON.parse(s);
+    const rows=await db("GET","operators","select=*&id=eq."+id);
+    if(!rows.length)return false;
+    const op=rows[0];
+    const perms={};
+    if(op.is_admin){
+      ["fiscal_reg","fiscal_view","fiscal_sn","fiscal_gs","admin"].forEach(m=>perms[m]=true);
+    } else {
+      const pr=await db("GET","operator_permissions","select=*&operator_id=eq."+op.id).catch(()=>[]);
+      (pr||[]).forEach(p=>{
+        if(p.can_view||p.can_edit||p.can_admin) perms[p.module]=true;
+        if(p.module==='fiscal_new'&&(p.can_edit||p.can_admin)) perms['fiscal_reg']=true;
+        if(p.module==='fiscal_registry'&&(p.can_view||p.can_edit)) perms['fiscal_view']=true;
+        if(p.module==='fiscal_sn'&&(p.can_view||p.can_edit)) perms['fiscal_sn']=true;
+      });
+      if(perms.fiscal_reg||perms.fiscal_view||perms.fiscal_sn) perms['fiscal_gs']=true;
+    }
+    ME={id:op.id,name:(op.first_name||"")+" "+(op.last_name||""),is_admin:!!op.is_admin,perms};
+    return true;
+  }catch(e){return false;}
+}
+
+function hasPerm(mod){
+  if(!ME)return false;
+  if(ME.is_admin||ME.perms.admin)return true;
+  return !!ME.perms[mod];
+}
+
+function showApp(){
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("app-screen").classList.add("show");
+  document.getElementById("sb-uname").textContent=ME.name.trim()||"Оператор";
+  document.getElementById("sb-urole").textContent=ME.is_admin?"Администратор":"Оператор";
+
+  // Lock nav items based on permissions
+  const locks={
+    "ni-new":    !hasPerm('fiscal_reg'),
+    "ni-registry":!hasPerm('fiscal_view'),
+    "ni-sn":     !hasPerm('fiscal_sn')||!hasPerm('fiscal_view'),
+    "ni-gs":     !hasPerm('fiscal_gs'),
+  };
+  Object.entries(locks).forEach(([id,locked])=>{
+    const el=document.getElementById(id);
+    if(locked){el.classList.add("locked");el.title="Нет доступа";}
+    else el.classList.remove("locked");
+  });
+
+  // Show/hide SN add buttons
+  if(hasPerm('fiscal_sn')){
+    const b1 = document.getElementById("btn-add-sn");
+    const b2 = document.getElementById("btn-add-fm");
+    if(b1) b1.style.display="";
+    if(b2) b2.style.display="";
+  }
+
+  // Go to first accessible panel
+  if(hasPerm('fiscal_view')) goPanel('registry');
+  else if(hasPerm('fiscal_reg')) goPanel('new');
+  else if(hasPerm('fiscal_sn')) goPanel('sn');
+  else goPanel('gs');
+
+  tick();setInterval(tick,1000);
+  checkConnection();
+}
+
+// ═══════════════════════════════════════════════
+// PANELS
+// ═══════════════════════════════════════════════
+function goPanel(id){
+  const permMap={new:'fiscal_reg',registry:'fiscal_view',sn:'fiscal_view',gs:'fiscal_gs'};
+  if(permMap[id]&&!hasPerm(permMap[id])){toast("Нет доступа к разделу","🔒");return;}
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("pn-"+id).classList.add("active");
+  document.querySelectorAll(".ni").forEach(n=>n.classList.remove("active"));
+  const ni=document.getElementById("ni-"+id);if(ni)ni.classList.add("active");
+  const meta={
+    new:{t:"Новая запись",bc:"Регистрация"},
+    registry:{t:"Реестр договоров",bc:"Договоры"},
+    sn:{t:"Реестр ФМ / S/N",bc:"Оборудование"},
+    gs:{t:"Google Sheets",bc:"Синхронизация"},
+  };
+  const m=meta[id]||{t:id,bc:id};
+  document.getElementById("page-ttl").textContent=m.t;
+  document.getElementById("bc-cur").textContent=m.bc;
+  closeSb();
+  if(id==="registry")loadRegistry();
+  if(id==="sn")loadSNRegistry();
+  if(id==="gs")loadGsHistory();
+}
+
+// ═══════════════════════════════════════════════
+// STEP NAVIGATION — кликабельная
+// ═══════════════════════════════════════════════
+let addresses=[];
+let kassData={};
+let currentStep=0;
+let stepsCompleted=0; // максимальный достигнутый шаг
+
+function setStep(n){
+  currentStep=n;
+  if(n>stepsCompleted)stepsCompleted=n;
+  ["step-contract","step-addresses","step-kass","step-save"].forEach((id,i)=>{
+    document.getElementById(id).style.display=i===n?"block":"none";
+  });
+  for(let i=0;i<4;i++){
+    const s=document.getElementById("st"+i);
+    s.className="step"+(i<n?" done":i===n?" active":"");
+  }
+  for(let i=0;i<3;i++){
+    document.getElementById("sl"+i).className="step-line"+(i<n?" done":"");
+  }
+}
+
+// Клик по кружку шага — переход с валидацией
+function jumpToStep(n){
+  if(n===currentStep)return;
+  if(n<currentStep){
+    // Назад — всегда свободно, данные сохраняются
+    setStep(n);
+    return;
+  }
+  // Вперёд — последовательная валидация
+  if(n>=1){
+    const req=["c-number","c-date","c-phone","c-firm","c-company","c-director","c-legal","c-inn","c-bank","c-mfo","c-account","c-oked"];
+    let ok=true;
+    req.forEach(id=>{const el=document.getElementById(id);if(!el.value.trim()){el.classList.add("err");ok=false;}else el.classList.remove("err");});
+    if(!ok){toast("Заполните договор (Шаг 1)","⚠️");setStep(0);return;}
+  }
+  if(n>=2){
+    const rows=document.querySelectorAll(".addr-row");
+    if(!rows.length){toast("Добавьте адреса (Шаг 2)","⚠️");setStep(1);if(!document.getElementById("addr-container").children.length)addAddr();return;}
+    addresses=[];let ok=true;
+    rows.forEach(r=>{
+      const addr=r.querySelector(".addr-inp").value.trim();
+      const count=parseInt(r.querySelector(".addr-cnt").value)||0;
+      if(!addr||count<1)ok=false;
+      addresses.push({address:addr,count});
+    });
+    if(!ok){toast("Заполните все адреса (Шаг 2)","⚠️");setStep(1);return;}
+    buildKassForm();
+  }
+  if(n>=3){
+    // Collect kass data without strict validation when jumping
+    kassData={};
+    addresses.forEach((a,ai)=>{
+      kassData[ai]=[];
+      for(let ki=0;ki<a.count;ki++){
+        kassData[ai].push({
+          gni:v(`k-${ai}-${ki}-gni`),sn:v(`k-${ai}-${ki}-sn`),
+          fm:v(`k-${ai}-${ki}-fm`),venue:v(`k-${ai}-${ki}-venue`),
+          adapter:v(`k-${ai}-${ki}-adapter`),
+        });
+      }
+    });
+    buildPreview();
+  }
+  setStep(n);
+}
+
+function goStep1(){
+  const req=["c-number","c-date","c-phone","c-firm","c-company","c-director","c-legal","c-inn","c-bank","c-mfo","c-account","c-oked"];
+  let ok=true;
+  req.forEach(id=>{const el=document.getElementById(id);if(!el.value.trim()){el.classList.add("err");ok=false;}else el.classList.remove("err");});
+  if(!ok){toast("Заполните все обязательные поля (*)","⚠️");return;}
+  setStep(1);
+  if(!document.getElementById("addr-container").children.length)addAddr();
+}
+
+function goStep2(){
+  const rows=document.querySelectorAll(".addr-row");
+  if(!rows.length){toast("Добавьте хотя бы один адрес","⚠️");return;}
+  let ok=true;addresses=[];
+  rows.forEach(r=>{
+    const inp=r.querySelector(".addr-inp");
+    const cnt=r.querySelector(".addr-cnt");
+    const addr=inp.value.trim();
+    const count=parseInt(cnt.value)||0;
+    if(!addr){inp.style.color="var(--danger)";ok=false;}else inp.style.color="";
+    if(count<1){cnt.classList.add("err");ok=false;}else cnt.classList.remove("err");
+    addresses.push({address:addr,count});
+  });
+  if(!ok){toast("Заполните все адреса и кол-во касс","⚠️");return;}
+  buildKassForm();
+  setStep(2);
+}
+
+function goStep3(){
+  let ok=true;
+  addresses.forEach((a,ai)=>{
+    for(let ki=0;ki<a.count;ki++){
+      ["gni","sn","fm","venue"].forEach(f=>{
+        const el=document.getElementById(`k-${ai}-${ki}-${f}`);
+        if(el&&!el.value.trim()){el.classList.add("err");ok=false;}
+        else if(el)el.classList.remove("err");
+      });
+    }
+  });
+  if(!ok){toast("Заполните все поля касс (ГНИ, S/N, ФМ, Заведение)","⚠️");return;}
+  kassData={};
+  addresses.forEach((a,ai)=>{
+    kassData[ai]=[];
+    for(let ki=0;ki<a.count;ki++){
+      kassData[ai].push({
+        gni:v(`k-${ai}-${ki}-gni`),sn:v(`k-${ai}-${ki}-sn`),
+        fm:v(`k-${ai}-${ki}-fm`),venue:v(`k-${ai}-${ki}-venue`),
+        adapter:v(`k-${ai}-${ki}-adapter`),
+      });
+    }
+  });
+  buildPreview();
+  setStep(3);
+}
+
+function v(id){const el=document.getElementById(id);return el?el.value.trim():"";}
+
+// ═══════════════════════════════════════════════
+// ADDRESSES
+// ═══════════════════════════════════════════════
+let addrCount=0;
+function addAddr(){
+  const c=document.getElementById("addr-container");
+  if(c.children.length>=10){toast("Максимум 10 адресов","⚠️");return;}
+  addrCount++;const n=addrCount;
+  const div=document.createElement("div");div.className="addr-row";div.id="ar-"+n;
+  div.innerHTML=`
+    <div class="addr-num">${n}</div>
+    <input class="addr-inp" placeholder="Адрес ${n}: ул. ..., офис ..." id="a-inp-${n}">
+    <input class="addr-cnt err" type="number" min="1" max="20" placeholder="1" id="a-cnt-${n}" style="width:70px;flex-shrink:0">
+    <button class="btn btn-danger btn-sm" onclick="removeAddr(${n})" style="flex-shrink:0;padding:5px 9px">✕</button>`;
+  c.appendChild(div);
+}
+function removeAddr(n){const el=document.getElementById("ar-"+n);if(el)el.remove();}
+
+// ═══════════════════════════════════════════════
+// KASS FORM
+// ═══════════════════════════════════════════════
+function buildKassForm(){
+  const body=document.getElementById("kass-body");
+  if(!addresses.length){body.innerHTML='<div class="empty"><span class="empty-ico">🖥️</span>Нет адресов</div>';return;}
+  let html='<div class="addr-tabs">';
+  addresses.forEach((a,ai)=>{html+=`<div class="atab${ai===0?" active":""}" id="atab-${ai}" onclick="switchAtab(${ai})">${ai+1}. ${x(a.address.slice(0,22))}</div>`;});
+  html+='</div>';
+  addresses.forEach((a,ai)=>{
+    html+=`<div class="apanel${ai===0?" active":""}" id="apanel-${ai}">`;
+    html+=`<div class="ktabs" id="ktabs-${ai}">`;
+    for(let ki=0;ki<a.count;ki++)
+      html+=`<div class="ktab${ki===0?" active":""}" id="ktab-${ai}-${ki}" onclick="switchKtab(${ai},${ki})">Касса ${ai+1}.${ki+1}</div>`;
+    html+='</div>';
+    for(let ki=0;ki<a.count;ki++){
+      const prev=kassData[ai]?.[ki]||{};
+      html+=`<div class="kpanel${ki===0?" active":""}" id="kpanel-${ai}-${ki}">
+        <div class="fr2">
+          <div class="fg"><label>ГНИ *</label><input id="k-${ai}-${ki}-gni" placeholder="Код ГНИ" value="${x(prev.gni||'')}"></div>
+          <div class="fg"><label>Адаптер</label><input id="k-${ai}-${ki}-adapter" placeholder="Модель адаптера" value="${x(prev.adapter||'')}"></div>
+        </div>
+        <div class="fr2">
+          <div class="fg"><label>S/N *</label><input id="k-${ai}-${ki}-sn" placeholder="Серийный номер" value="${x(prev.sn||'')}" oninput="liveCheckSN(${ai},${ki})"></div>
+          <div class="fg"><label>Фискальный модуль *</label><input id="k-${ai}-${ki}-fm" placeholder="ФМ" value="${x(prev.fm||'')}" oninput="liveCheckSN(${ai},${ki})"></div>
+        </div>
+        <div class="fr1"><div class="fg"><label>Заведение *</label><input id="k-${ai}-${ki}-venue" placeholder="Название" value="${x(prev.venue||'')}"></div></div>
+        <button class="btn btn-ghost btn-sm" onclick="checkKassSN(${ai},${ki})">🔍 Проверить S/N и ФМ</button>
+        <div class="check-box" id="cb-${ai}-${ki}"></div>
+      </div>`;
+    }
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
+function switchAtab(ai){
+  document.querySelectorAll(".atab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".apanel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("atab-"+ai)?.classList.add("active");
+  document.getElementById("apanel-"+ai)?.classList.add("active");
+}
+function switchKtab(ai,ki){
+  document.querySelectorAll(`#ktabs-${ai} .ktab`).forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(`#apanel-${ai} .kpanel`).forEach(p=>p.classList.remove("active"));
+  document.getElementById(`ktab-${ai}-${ki}`)?.classList.add("active");
+  document.getElementById(`kpanel-${ai}-${ki}`)?.classList.add("active");
+}
+let snTimers={};
+function liveCheckSN(ai,ki){clearTimeout(snTimers[`${ai}-${ki}`]);snTimers[`${ai}-${ki}`]=setTimeout(()=>checkKassSN(ai,ki),600);}
+async function checkKassSN(ai,ki){
+  const sn=v(`k-${ai}-${ki}-sn`),fm=v(`k-${ai}-${ki}-fm`);
+  const box=document.getElementById(`cb-${ai}-${ki}`);
+  if(!sn&&!fm){box.className="check-box";return;}
+  try{const res=await checkSNFM(sn,fm);renderCheckBox(box,res);}
+  catch(e){box.className="check-box warn show";box.textContent="Ошибка проверки";}
+}
+async function checkSNFM(sn,fm){
+  const r={sn:null,fm:null};
+  if(sn){const d=await db("GET","fiscal_registry","select=*&sn=eq."+encodeURIComponent(sn)).catch(()=>[]);if(d.length)r.sn=d[0];}
+  if(fm){const d=await db("GET","fiscal_registry","select=*&fiscal_module=eq."+encodeURIComponent(fm)).catch(()=>[]);if(d.length)r.fm=d[0];}
+  return r;
+}
+function renderCheckBox(box,res){
+  let msg="",cls="ok";
+  if(res.sn){if(res.sn.busy){msg+=`🔴 S/N ЗАНЯТ — договор: ${x(res.sn.contract||"—")}, ${x(res.sn.venue||"—")}\n`;cls="warn";}else msg+=`🟢 S/N свободен: ${x(res.sn.sn||"")}\n`;}
+  else msg+="🟢 S/N не найден в реестре\n";
+  if(res.fm){if(res.fm.busy){msg+=`🔴 ФМ ЗАНЯТ — договор: ${x(res.fm.contract||"—")}, ${x(res.fm.venue||"—")}`;cls="warn";}else msg+=`🟢 ФМ свободен: ${x(res.fm.fiscal_module||"")}`;}
+  else msg+="🟢 ФМ не найден в реестре";
+  if(res.sn?.busy&&res.fm?.busy&&res.sn?.contract&&res.fm?.contract&&res.sn.contract!==res.fm.contract){msg+="\n❗ КОНФЛИКТ: S/N и ФМ из РАЗНЫХ договоров!";cls="conflict";}
+  box.className=`check-box ${cls} show`;
+  box.innerHTML=msg.split("\n").map(l=>`<div>${l}</div>`).join("");
+}
+
+// ═══════════════════════════════════════════════
+// PREVIEW
+// ═══════════════════════════════════════════════
+function buildPreview(){
+  const c={number:v("c-number"),date:v("c-date"),phone:v("c-phone"),inn:v("c-inn"),firm:v("c-firm"),director:v("c-director"),nds:v("c-nds")||"Нет",bank:v("c-bank"),mfo:v("c-mfo")};
+  let html=`<div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:14px">Договор №${x(c.number)}</div>`;
+  html+=`<div class="fr2" style="margin-bottom:12px">
+    <div><div style="font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:3px">ДАТА</div><div>${x(c.date)}</div></div>
+    <div><div style="font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:3px">ТЕЛЕФОН</div><div>${x(c.phone)}</div></div>
+    <div><div style="font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:3px">ИНН</div><div style="color:var(--accent)">${x(c.inn)}</div></div>
+    <div><div style="font-size:9px;color:var(--t3);letter-spacing:1px;margin-bottom:3px">НДС</div><div>${x(c.nds)}</div></div>
+  </div>
+  <div style="margin-bottom:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+    <div style="font-size:10px;font-weight:600;margin-bottom:4px">${x(c.firm)}</div>
+    <div style="font-size:10px;color:var(--t2)">${x(c.director)} · ${x(c.bank)} · МФО ${x(c.mfo)}</div>
+  </div>`;
+  let total=0;
+  addresses.forEach((a,ai)=>{
+    const kl=kassData[ai]||[];total+=kl.length;
+    html+=`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--a2);margin-bottom:6px;font-weight:600">📍 ${x(a.address)}</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    kl.forEach((k,ki)=>{
+      html+=`<div style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:10px">
+        <div style="color:var(--accent);font-weight:600">Касса ${ai+1}.${ki+1}</div>
+        <div style="color:var(--t2);margin-top:2px">ГНИ: ${x(k.gni)} · S/N: ${x(k.sn)}</div>
+        <div style="color:var(--t2)">ФМ: ${x(k.fm)}</div>
+        <div style="margin-top:2px">${x(k.venue)}</div>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  html+=`<div style="margin-top:14px;padding:12px 14px;background:var(--glow);border-radius:8px;display:flex;gap:16px">
+    <span>Адресов: <strong>${addresses.length}</strong></span>
+    <span>Касс: <strong>${total}</strong></span>
+  </div>`;
+  document.getElementById("save-preview").innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════════
+async function saveAll(){
+  if(!hasPerm('fiscal_reg')){toast("Нет прав для создания записей","🔒");return;}
+  const btn=document.getElementById("save-btn");
+  const st=document.getElementById("save-status");
+  btn.disabled=true;btn.textContent="⏳ Сохранение...";st.textContent="";
+  const c={
+    number:v("c-number"),contract_date:v("c-date"),phone_number:v("c-phone"),
+    inn:v("c-inn"),firm_name:v("c-firm"),company_name:v("c-company"),
+    director_name:v("c-director"),nds:v("c-nds")||"Нет",legal_address:v("c-legal"),
+    bank:v("c-bank"),mfo:v("c-mfo"),account:v("c-account"),oked:v("c-oked"),
+  };
+  try{
+    const ex=await db("GET","fiscal_contracts","select=id&number=eq."+encodeURIComponent(c.number));
+    if(ex.length){toast(`Договор №${c.number} уже существует!`,"❌");btn.disabled=false;btn.textContent="💾 Сохранить";return;}
+    const [contract]=await db("POST","fiscal_contracts","",{...c,created_by:ME.id});
+    st.textContent="✓ Договор";
+    const rows=[];
+    addresses.forEach((a,ai)=>{
+      (kassData[ai]||[]).forEach((k,ki)=>{
+        rows.push({
+          contract_id:contract.id,contract_number:c.number,contract_date:c.contract_date,
+          kass_number:`Касса ${ai+1}.${ki+1}`,address:a.address,
+          gni:k.gni,serial_number:k.sn,fiscal_module:k.fm,
+          venue_name:k.venue,adapter:k.adapter||"",status:"В работе",
+          phone_number:c.phone_number,firm_name:c.firm_name,company_name:c.company_name,
+          director_name:c.director_name,legal_address:c.legal_address,
+          inn:c.inn,bank:c.bank,mfo:c.mfo,account:c.account,oked:c.oked,nds:c.nds,
+          created_by:ME.id,
+        });
+      });
+    });
+    if(rows.length)await db("POST","fiscal_kass","",rows);
+    st.textContent=`✓ Договор ✓ Кассы (${rows.length})`;
+    for(const row of rows){
+      if(row.serial_number){
+        const snRows=await db("GET","fiscal_registry","select=id&sn=eq."+encodeURIComponent(row.serial_number)).catch(()=>[]);
+        if(snRows.length) await db("PATCH","fiscal_registry","sn=eq."+encodeURIComponent(row.serial_number),{busy:true,status:'В работе',contract:c.number,venue:row.venue_name,inn:c.inn}).catch(()=>{});
+        else await db("POST","fiscal_registry","",{sn:row.serial_number,fiscal_module:row.fiscal_module||'',busy:true,status:'В работе',contract:c.number,venue:row.venue_name,inn:c.inn}).catch(()=>{});
+      }
+      if(row.fiscal_module && !row.serial_number){
+        const fmRows=await db("GET","fiscal_registry","select=id&fiscal_module=eq."+encodeURIComponent(row.fiscal_module)).catch(()=>[]);
+        if(fmRows.length) await db("PATCH","fiscal_registry","fiscal_module=eq."+encodeURIComponent(row.fiscal_module),{busy:true,status:'В работе',contract:c.number,venue:row.venue_name,inn:c.inn}).catch(()=>{});
+        else await db("POST","fiscal_registry","",{fiscal_module:row.fiscal_module,busy:true,status:'В работе',contract:c.number,venue:row.venue_name,inn:c.inn}).catch(()=>{});
+      }
+    }
+    toast(`Договор №${c.number} сохранён (${rows.length} касс)!`,"✅");
+    btn.textContent="✅ Сохранено";
+    setTimeout(()=>{clearForm();setStep(0);goPanel("registry");},1800);
+  }catch(e){toast("Ошибка: "+e.message.slice(0,60),"❌");btn.disabled=false;btn.textContent="💾 Сохранить";}
+}
+
+// ═══════════════════════════════════════════════
+// INN SEARCH
+// ═══════════════════════════════════════════════
+function openInnSearch(){openModal("mo-inn");document.getElementById("inn-search-inp").value="";document.getElementById("inn-results").style.display="none";}
+let innTimer;
+async function searchINN(){
+  clearTimeout(innTimer);
+  const q=document.getElementById("inn-search-inp").value.trim();
+  const res=document.getElementById("inn-results");
+  if(!q){res.style.display="none";return;}
+  innTimer=setTimeout(async()=>{
+    try{
+      const rows=await db("GET","fiscal_contracts","select=inn,firm_name,company_name,director_name,phone_number,bank,mfo,account,oked,legal_address,nds&inn=ilike.*"+encodeURIComponent(q)+"*&limit=10");
+      if(!rows.length){res.style.display="none";return;}
+      res.style.display="block";
+      window._innMap={};
+      rows.forEach((r,i)=>{window._innMap[i]=r;});
+      res.innerHTML=rows.map((r,i)=>`<div class="inn-row" onclick="fillFromINN(${i})">
+        <div style="font-weight:600">${x(r.firm_name||r.company_name||"—")}</div>
+        <div style="font-size:9px;color:var(--t2)">ИНН: ${x(r.inn||"—")} · ${x(r.director_name||"")}</div>
+      </div>`).join("");
+    }catch(e){res.style.display="none";}
+  },350);
+}
+function fillFromINN(idx){const r=window._innMap[idx]||{};
+  const map={"c-inn":"inn","c-firm":"firm_name","c-company":"company_name","c-director":"director_name","c-phone":"phone_number","c-bank":"bank","c-mfo":"mfo","c-account":"account","c-oked":"oked","c-legal":"legal_address","c-nds":"nds"};
+  Object.entries(map).forEach(([id,key])=>{if(r[key])document.getElementById(id).value=r[key];});
+  closeModal("mo-inn");toast("Данные подставлены","✅");
+}
+
+// ═══════════════════════════════════════════════
+// REGISTRY
+// ═══════════════════════════════════════════════
+let allReg=[];
+async function loadRegistry(){
+  document.getElementById("reg-wrap").innerHTML='<div class="loading"><span class="spin">◌</span> Загрузка</div>';
+  try{
+    allReg=await db("GET","fiscal_kass","select=*&order=id.desc&limit=1000");
+    const contracts=new Set(allReg.map(r=>r.contract_number).filter(Boolean));
+    const active=allReg.filter(r=>r.status==="В работе").length;
+    const companies=new Set(allReg.map(r=>r.company_name).filter(Boolean));
+    document.getElementById("rs-contracts").textContent=contracts.size;
+    document.getElementById("rs-kass").textContent=allReg.length;
+    document.getElementById("rs-active").textContent=active;
+    document.getElementById("rs-companies").textContent=companies.size;
+    filterReg();
+  }catch(e){document.getElementById("reg-wrap").innerHTML='<div class="empty"><span class="empty-ico">⚠️</span>Ошибка</div>';}
+}
+function filterReg(){
+  const q=document.getElementById("reg-q").value.toLowerCase();
+  const f=allReg.filter(r=>!q||[r.contract_number,r.firm_name,r.inn,r.company_name,r.address,r.venue_name,r.serial_number,r.fiscal_module].some(s=>(s||"").toLowerCase().includes(q)));
+  const w=document.getElementById("reg-wrap");
+  if(!f.length){w.innerHTML='<div class="empty"><span class="empty-ico">🔍</span>Ничего не найдено</div>';return;}
+  const canEditReg = hasPerm('fiscal_sn');
+  w.innerHTML=`<table style="font-size:10px"><thead><tr>
+    <th style="white-space:nowrap">Договор / Дата</th>
+    <th>Фирма / ИНН</th>
+    <th>Адрес / Заведение</th>
+    <th style="white-space:nowrap">Касса / S/N / ФМ</th>
+    <th>Статус</th>
+    ${canEditReg?'<th>Действия</th>':''}
+  </tr></thead><tbody>${
+    f.map(r=>{
+      const st = r.status||'В работе';
+      let stBadge;
+      if(st==='Активный')           stBadge='<span class="badge b-ok" style="font-size:8px">✅ Акт</span>';
+      else if(st==='Деактивирован') stBadge='<span class="badge b-red" style="font-size:8px">❌ Деакт</span>';
+      else                          stBadge='<span class="badge b-warn" style="font-size:8px">⚙️ Раб</span>';
+      return `<tr>
+        <td style="white-space:nowrap">
+          <div style="font-weight:600;color:var(--accent);font-size:10px">${x(r.contract_number||'—')}</div>
+          <div style="color:var(--t3);font-size:9px">${x(r.contract_date||'—')}</div>
+        </td>
+        <td>
+          <div style="font-weight:600;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x(r.firm_name||'')}">${x(r.firm_name||'—')}</div>
+          <div style="font-size:9px;color:var(--t3)">${x(r.inn||'—')}</div>
+        </td>
+        <td>
+          <div style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x(r.address||'')}">${x(r.address||'—')}</div>
+          <div style="font-size:9px;color:var(--a2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x(r.venue_name||'')}">${x(r.venue_name||'—')}</div>
+        </td>
+        <td style="white-space:nowrap">
+          <div style="color:var(--t2);font-size:9px">${x(r.kass_number||'—')}</div>
+          <code style="color:var(--accent);font-size:9px">${x(r.serial_number||'—')}</code>
+          <div><code style="color:var(--t2);font-size:9px">${x(r.fiscal_module||'—')}</code></div>
+        </td>
+        <td>${stBadge}</td>
+        ${canEditReg?`<td>
+          <div style="display:flex;gap:3px;align-items:center;flex-wrap:nowrap">
+            <button class="btn btn-ghost btn-sm" onclick="openEditKassRecord(${r.id})" title="Редактировать" style="padding:4px 7px">✏️</button>
+            <button class="btn btn-warn btn-sm" onclick="openReplaceFromKass(${r.id})" title="Заменить S/N или ФМ" style="padding:4px 7px">🔄</button>
+            <select style="background:var(--inp);border:1px solid var(--border);border-radius:5px;color:var(--t2);font-size:9px;padding:3px 5px;cursor:pointer;max-width:90px"
+              onchange="changeKassStatus(${r.id},this.value)" title="Сменить статус">
+              <option value="">Статус▾</option>
+              <option value="В работе"${st==='В работе'?' selected':''}>⚙️ В работе</option>
+              <option value="Активный"${st==='Активный'?' selected':''}>✅ Активный</option>
+              <option value="Деактивирован"${st==='Деактивирован'?' selected':''}>❌ Деакт</option>
+            </select>
+          </div>
+        </td>`:''}
+      </tr>`;
+    }).join('')
+  }</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════
+// SN / FM REGISTRY — раздельные таблицы
+// ═══════════════════════════════════════════════════
+let allSN = [];
+let currentSnTab = 'sn';
+
+function switchSnTab(tab){
+  currentSnTab = tab;
+  document.querySelectorAll('.sntab').forEach(t => {
+    const isActive = t.id === 'sntab-'+tab;
+    t.style.color = isActive ? 'var(--accent)' : 'var(--t2)';
+    t.style.borderBottomColor = isActive ? 'var(--accent)' : 'transparent';
+  });
+  document.getElementById('snpanel-sn').style.display = tab==='sn' ? '' : 'none';
+  document.getElementById('snpanel-fm').style.display = tab==='fm' ? '' : 'none';
+}
+
+async function loadSNRegistry(){
+  ['sn','fm'].forEach(t => {
+    const el = document.getElementById('sn-wrap-'+t);
+    if(el) el.innerHTML = '<div class="loading"><span class="spin">◌</span></div>';
+  });
+  try{
+    allSN = await db("GET","fiscal_registry","select=*&order=id.desc&limit=2000");
+    filterSNTab('sn');
+    filterSNTab('fm');
+  }catch(e){
+    ['sn','fm'].forEach(t => {
+      const el = document.getElementById('sn-wrap-'+t);
+      if(el) el.innerHTML = '<div class="empty"><span class="empty-ico">⚠️</span>Ошибка загрузки</div>';
+    });
+  }
+}
+
+function snStatusBadge(r){
+  const s = r.status||'';
+  if(s==='Активный')     return '<span class="badge b-ok">✅ Активный</span>';
+  if(s==='Деактивирован')return '<span class="badge b-red">❌ Деактивирован</span>';
+  if(s==='В работе')     return '<span class="badge b-warn">⚙️ В работе</span>';
+  if(s==='Утеря')        return '<span class="badge b-red">🔍 Утеря</span>';
+  if(s==='Порча')        return '<span class="badge b-red">💔 Порча</span>';
+  // fallback to busy
+  return r.busy ? '<span class="badge b-red">🔴 Занят</span>' : '<span class="badge b-ok">🟢 Свободен</span>';
+}
+
+function filterSNTab(tab){
+  const q = (document.getElementById('sn-q-'+tab)||{value:''}).value.toLowerCase();
+  const statusF = (document.getElementById('sn-busy-'+tab)||{value:''}).value;
+  const canEdit = hasPerm('fiscal_sn');
+  const w = document.getElementById('sn-wrap-'+tab);
+  if(!w) return;
+
+  let f = allSN.filter(r => {
+    if(tab==='sn' && !r.sn && r.fiscal_module) return false;
+    if(tab==='fm' && !r.fiscal_module && r.sn) return false;
+    // Фильтр по статусу
+    if(statusF){
+      if(statusF==='0' && r.busy) return false;
+      if(statusF==='1' && !r.busy) return false;
+      if(['Активный','Деактивирован','В работе','Утеря','Порча'].includes(statusF) && r.status!==statusF) return false;
+    }
+    if(q && ![r.sn,r.fiscal_module,r.contract,r.venue,r.inn,r.status,r.comment].some(s=>(s||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  if(!f.length){w.innerHTML='<div class="empty"><span class="empty-ico">📦</span>Пусто</div>';return;}
+
+  const isSnTab = tab === 'sn';
+  w.innerHTML = `<table><thead><tr>
+    <th>Статус</th>
+    <th>${isSnTab ? 'S/N' : 'Фискальный Модуль/KKM'}</th>
+    <th>${isSnTab ? 'ФМ' : 'S/N'}</th>
+    <th>Договор</th>
+    <th>Заведение / ИНН</th>
+    <th>Комментарий</th>
+    ${canEdit ? '<th>Действия</th>' : ''}
+  </tr></thead><tbody>${
+    f.map(r => `<tr>
+      <td>
+        ${snStatusBadge(r)}
+        <div style="margin-top:3px">${r.busy?'<span class="badge b-red" style="font-size:8px">🔴 Занят</span>':'<span class="badge b-ok" style="font-size:8px">🟢 Свободен</span>'}</div>
+      </td>
+      <td><code style="color:var(--accent);font-size:10px">${x(isSnTab?(r.sn||'—'):(r.fiscal_module||'—'))}</code></td>
+      <td><code style="color:var(--t2);font-size:10px">${x(isSnTab?(r.fiscal_module||'—'):(r.sn||'—'))}</code></td>
+      <td style="color:var(--a2);font-size:10px;white-space:nowrap">${x(r.contract||'—')}</td>
+      <td><div style="font-size:10px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x(r.venue||'')}">${x(r.venue||'—')}</div><div style="font-size:9px;color:var(--t3)">${x(r.inn||'')}</div></td>
+      <td style="font-size:10px;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x(r.comment||'')}">${x(r.comment||'—')}</td>
+      ${canEdit ? `<td style="white-space:nowrap">
+        <div style="display:flex;gap:3px;align-items:center">
+          <select style="background:var(--inp);border:1px solid var(--border);border-radius:5px;color:var(--t2);font-size:9px;padding:3px 4px;cursor:pointer;max-width:88px"
+            onchange="changeSNStatus(${r.id},this.value)" title="Сменить статус">
+            <option value="">Статус▾</option>
+            <option value="Активный"${r.status==='Активный'?' selected':''}>✅ Акт</option>
+            <option value="Деактивирован"${r.status==='Деактивирован'?' selected':''}>❌ Деакт</option>
+            <option value="В работе"${r.status==='В работе'?' selected':''}>⚙️ Работа</option>
+            <option value="Утеря"${r.status==='Утеря'?' selected':''}>🔍 Утеря</option>
+            <option value="Порча"${r.status==='Порча'?' selected':''}>💔 Порча</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="openEditSNRecord(${r.id})" title="Редактировать" style="padding:4px 6px">✏️</button>
+          <button class="btn btn-warn btn-sm" onclick="openReplaceByRegistry(${r.id})" title="Замена" style="padding:4px 6px">🔄</button>
+          <button class="btn btn-ghost btn-sm" onclick="openHistory(${r.id})" title="История" style="padding:4px 6px">📋</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSN(${r.id})" title="Удалить" style="padding:4px 6px">✕</button>
+        </div>
+      </td>` : ''}
+    </tr>`).join('')
+  }</tbody></table>`;
+}
+
+// Старый filterSN для совместимости
+function filterSN(){ filterSNTab(currentSnTab); }
+
+// ─── Добавление одного SN или FM ─────────────────────
+
+
+function openEditRecord(id, type){
+  // Делегируем в полноценный редактор
+  openEditSNRecord(id);
+}
+
+function openAddRecord(type){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  document.getElementById('sn-edit-id').value = '';
+  document.getElementById('sn-edit-type').value = type;
+  document.getElementById('sn-edit-sn').value = '';
+  document.getElementById('sn-edit-fm').value = '';
+  document.getElementById('sn-edit-comment').value = '';
+  document.getElementById('sn-edit-sn-row').style.display = type==='sn' ? '' : 'none';
+  document.getElementById('sn-edit-fm-row').style.display = type==='fm' ? '' : 'none';
+  document.getElementById('mo-sn-title').textContent = type==='sn' ? '➕ Добавить S/N' : '➕ Добавить ФМ';
+  document.querySelectorAll('#mo-sn .sn-hint').forEach(el=>el.style.display='');
+  openModal('mo-sn');
+}
+
+async function saveSNRecord(){
+  const id      = document.getElementById('sn-edit-id').value;
+  const type    = document.getElementById('sn-edit-type').value;
+  const rawSN   = document.getElementById('sn-edit-sn').value.trim();
+  const rawFM   = document.getElementById('sn-edit-fm').value.trim();
+  const comment = document.getElementById('sn-edit-comment').value.trim();
+
+  // РЕДАКТИРОВАНИЕ одной записи
+  if(id){
+    if(type==='sn' && !rawSN){toast("Введите S/N","⚠️");return;}
+    if(type==='fm' && !rawFM){toast("Введите ФМ","⚠️");return;}
+    const payload = {comment};
+    if(type==='sn') payload.sn = rawSN;
+    else payload.fiscal_module = rawFM;
+    try{
+      await db("PATCH","fiscal_registry","id=eq."+id, payload);
+      closeModal('mo-sn');
+      toast("Обновлено","✅");
+      loadSNRegistry();
+    }catch(e){toast("Ошибка: "+e.message.slice(0,50),"❌");}
+    return;
+  }
+
+  // МАССОВОЕ ДОБАВЛЕНИЕ — разбиваем по пробелам, запятым, переносам строк
+  const raw = type==='sn' ? rawSN : rawFM;
+  if(!raw){toast(type==='sn'?"Введите S/N":"Введите ФМ","⚠️");return;}
+
+  const values = raw
+    .split(/[\s,;]+/)           // пробел, запятая, точка с запятой, перенос
+    .map(v => v.trim().toUpperCase())
+    .filter(v => v.length > 0);
+
+  if(!values.length){toast("Нет данных для добавления","⚠️");return;}
+
+  const btn = document.querySelector('#mo-sn .btn-primary');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Добавление...'; }
+
+  try{
+    // Батч по 50 штук
+    let added = 0, skipped = 0;
+    const batch = values.map(v => {
+      const row = {comment};
+      if(type==='sn') row.sn = v;
+      else row.fiscal_module = v;
+      return row;
+    });
+
+    for(let i=0; i<batch.length; i+=50){
+      try{
+        await db("POST","fiscal_registry","", batch.slice(i,i+50));
+        added += Math.min(50, batch.length-i);
+      }catch(e){
+        skipped += Math.min(50, batch.length-i);
+      }
+    }
+
+    closeModal('mo-sn');
+    const msg = added === values.length
+      ? (type==='sn'?'S/N':'ФМ')+': добавлено '+added+' шт.'
+      : 'Добавлено: '+added+' · Пропущено: '+skipped+' (дубли?)';
+    toast(msg, added > 0 ? "✅" : "⚠️");
+    loadSNRegistry();
+  }catch(e){
+    toast("Ошибка: "+e.message.slice(0,50),"❌");
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='💾 Сохранить'; }
+  }
+}
+
+async function deleteSN(id){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  if(!confirm("Удалить запись?")) return;
+  try{
+    await db("DELETE","fiscal_registry","id=eq."+id);
+    toast("Удалено","✅");
+    loadSNRegistry();
+  }catch(e){toast("Ошибка","❌");}
+}
+
+// ─── ЗАМЕНА — выбор компании из реестра касс ──────────
+async function openReplaceByRegistry(registryId){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  const reg = allSN.find(r => r.id === registryId);
+  if(!reg) return;
+  // Найти кассу по SN или FM
+  let kass = null;
+  try{
+    const snVal = reg.sn;
+    const fmVal = reg.fiscal_module;
+    let rows = [];
+    if(snVal) rows = await db("GET","fiscal_kass","select=*&serial_number=eq."+encodeURIComponent(snVal)+"&limit=1");
+    if(!rows.length && fmVal) rows = await db("GET","fiscal_kass","select=*&fiscal_module=eq."+encodeURIComponent(fmVal)+"&limit=1");
+    if(rows.length) kass = rows[0];
+  }catch(e){}
+  document.getElementById('rep-kass-id').value = registryId;
+  document.getElementById('rep-old-sn').textContent = reg.sn||'—';
+  document.getElementById('rep-old-fm').textContent = reg.fiscal_module||'—';
+  document.getElementById('rep-company').textContent = kass ? (kass.firm_name||kass.company_name||'—') : (reg.venue||'Не привязан');
+  document.getElementById('rep-contract').textContent = kass ? (kass.contract_number||'—') : (reg.contract||'—');
+  document.getElementById('rep-kassnum').textContent = kass ? (kass.kass_number||'—') : '—';
+  document.getElementById('rep-addr').textContent = kass ? (kass.address||'—') : '—';
+  document.getElementById('rep-change-sn').checked = false;
+  document.getElementById('rep-change-fm').checked = false;
+  document.getElementById('rep-sn').value = '';
+  document.getElementById('rep-fm').value = '';
+  document.getElementById('rep-sn-row').style.display = 'none';
+  document.getElementById('rep-fm-row').style.display = 'none';
+  document.getElementById('rep-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('rep-reason').value = '';
+  openModal('mo-replace');
+}
+
+function toggleRepFields(){
+  document.getElementById('rep-sn-row').style.display = document.getElementById('rep-change-sn').checked ? '' : 'none';
+  document.getElementById('rep-fm-row').style.display = document.getElementById('rep-change-fm').checked ? '' : 'none';
+}
+
+
+// Замена S/N или ФМ — открывается из реестра договоров
+// kassId = id записи в fiscal_kass
+async function openReplaceFromKass(kassId){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  // Находим кассу в уже загруженных данных
+  let kass = allReg.find(r => r.id === kassId);
+  if(!kass){
+    try{ const rows = await db("GET","fiscal_kass","select=*&id=eq."+kassId); kass = rows[0]; }
+    catch(e){ toast("Ошибка загрузки данных","❌"); return; }
+  }
+  if(!kass){ toast("Касса не найдена","❌"); return; }
+
+  // Заполняем модал
+  document.getElementById('rep-kass-id').value = kassId;
+  document.getElementById('rep-old-sn').textContent  = kass.serial_number  || '—';
+  document.getElementById('rep-old-fm').textContent  = kass.fiscal_module   || '—';
+  document.getElementById('rep-company').textContent = kass.firm_name || kass.company_name || '—';
+  document.getElementById('rep-contract').textContent= kass.contract_number || '—';
+  document.getElementById('rep-kassnum').textContent = kass.kass_number     || '—';
+  document.getElementById('rep-addr').textContent    = kass.address         || '—';
+  // Сбрасываем поля
+  document.getElementById('rep-change-sn').checked = false;
+  document.getElementById('rep-change-fm').checked = false;
+  document.getElementById('rep-sn').value = '';
+  document.getElementById('rep-fm').value = '';
+  document.getElementById('rep-sn-row').style.display = 'none';
+  document.getElementById('rep-fm-row').style.display = 'none';
+  document.getElementById('rep-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('rep-reason').value = '';
+  openModal('mo-replace');
+}
+
+async function saveReplace(){
+  const kassId = document.getElementById('rep-kass-id').value;
+  const changeSN = document.getElementById('rep-change-sn').checked;
+  const changeFM = document.getElementById('rep-change-fm').checked;
+  const newSN   = document.getElementById('rep-sn').value.trim();
+  const newFM   = document.getElementById('rep-fm').value.trim();
+  const date    = document.getElementById('rep-date').value;
+  const reason  = document.getElementById('rep-reason').value.trim();
+
+  if(!date || !reason){toast("Заполните дату и причину","⚠️");return;}
+  if(!changeSN && !changeFM){toast("Отметьте что менять: S/N и/или ФМ","⚠️");return;}
+  if(changeSN && !newSN){toast("Введите новый S/N","⚠️");return;}
+  if(changeFM && !newFM){toast("Введите новый ФМ","⚠️");return;}
+
+  try{
+    // Загружаем текущие данные кассы
+    const [kass] = await db("GET","fiscal_kass","select=*&id=eq."+kassId);
+    if(!kass){toast("Касса не найдена","❌");return;}
+
+    const oldSN = kass.serial_number  || '';
+    const oldFM = kass.fiscal_module  || '';
+
+    // 1. Сохраняем историю
+    await db("POST","fiscal_registry_history","",{
+      registry_id: parseInt(kassId),
+      old_sn: oldSN, old_fm: oldFM,
+      new_sn: changeSN ? newSN : oldSN,
+      new_fm: changeFM ? newFM : oldFM,
+      replace_date: date, reason,
+      operator_id: ME.id, operator_name: ME.name,
+    }).catch(()=>{});
+
+    // 2. Обновляем fiscal_kass
+    const kassUpd = {};
+    if(changeSN) kassUpd.serial_number = newSN;
+    if(changeFM) kassUpd.fiscal_module  = newFM;
+    await db("PATCH","fiscal_kass","id=eq."+kassId, kassUpd);
+
+    // 3. Синхронизируем fiscal_registry
+    if(changeSN){
+      if(oldSN) await db("PATCH","fiscal_registry","sn=eq."+encodeURIComponent(oldSN),{sn:newSN,busy:true,contract:kass.contract_number,venue:kass.venue_name}).catch(()=>{});
+      else       await db("POST","fiscal_registry","",{sn:newSN,busy:true,contract:kass.contract_number,venue:kass.venue_name,inn:kass.inn}).catch(()=>{});
+    }
+    if(changeFM){
+      if(oldFM) await db("PATCH","fiscal_registry","fiscal_module=eq."+encodeURIComponent(oldFM),{fiscal_module:newFM,busy:true,contract:kass.contract_number,venue:kass.venue_name}).catch(()=>{});
+      else       await db("POST","fiscal_registry","",{fiscal_module:newFM,busy:true,contract:kass.contract_number,venue:kass.venue_name,inn:kass.inn}).catch(()=>{});
+    }
+
+    closeModal('mo-replace');
+    toast("Замена выполнена"+(changeSN?" · S/N→"+newSN:"")+(changeFM?" · ФМ→"+newFM:""),"✅");
+    loadRegistry();
+    loadSNRegistry();
+  }catch(e){
+    toast("Ошибка: "+e.message.slice(0,60),"❌");
+    console.error(e);
+  }
+}
+
+async function openHistory(registryId){
+  openModal('mo-history');
+  document.getElementById('history-body').innerHTML='<div class="loading"><span class="spin">◌</span></div>';
+  try{
+    const rows = await db("GET","fiscal_registry_history","select=*&registry_id=eq."+registryId+"&order=id.desc");
+    if(!rows.length){document.getElementById('history-body').innerHTML='<div class="empty"><span class="empty-ico">📋</span>Замен не было</div>';return;}
+    document.getElementById('history-body').innerHTML = rows.map(r=>`
+      <div class="hist-entry">
+        <div class="hist-date">📅 ${x(r.replace_date||'—')} · ${x(r.operator_name||'—')}</div>
+        <div style="font-size:10px;margin:4px 0">
+          <span style="color:var(--t2)">S/N: </span><span style="color:var(--danger)">${x(r.old_sn||'—')}</span>
+          <span style="color:var(--t3)"> → </span><span style="color:var(--ok)">${x(r.new_sn||'—')}</span>
+          &nbsp;&nbsp;
+          <span style="color:var(--t2)">ФМ: </span><span style="color:var(--danger)">${x(r.old_fm||'—')}</span>
+          <span style="color:var(--t3)"> → </span><span style="color:var(--ok)">${x(r.new_fm||'—')}</span>
+        </div>
+        <div class="hist-reason">💬 ${x(r.reason||'—')}</div>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('history-body').innerHTML='<div class="empty" style="text-align:center;padding:20px"><div>Таблица не создана.</div><div style="margin-top:8px;font-size:10px">Выполните SQL в Supabase:<br><code style="color:var(--accent)">CREATE TABLE fiscal_registry_history (id serial PRIMARY KEY, registry_id int, old_sn text, old_fm text, new_sn text, new_fm text, replace_date text, reason text, operator_id int, operator_name text, created_at timestamptz DEFAULT now());</code></div></div>';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// EDIT KASS RECORD — все поля реестра договоров
+// ═══════════════════════════════════════════════
+function openEditKassRecord(id){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  const r = allReg.find(k => k.id===id);
+  if(!r){toast("Запись не найдена","❌");return;}
+  document.getElementById('ek-id').value = id;
+  const fields = {
+    'ek-contract-number': r.contract_number||'',
+    'ek-contract-date':   r.contract_date||'',
+    'ek-phone':           r.phone_number||'',
+    'ek-inn':             r.inn||'',
+    'ek-firm':            r.firm_name||'',
+    'ek-company':         r.company_name||'',
+    'ek-director':        r.director_name||'',
+    'ek-kass-number':     r.kass_number||'',
+    'ek-address':         r.address||'',
+    'ek-sn':              r.serial_number||'',
+    'ek-fm':              r.fiscal_module||'',
+    'ek-venue':           r.venue_name||'',
+    'ek-gni':             r.gni||'',
+    'ek-bank':            r.bank||'',
+    'ek-mfo':             r.mfo||'',
+    'ek-account':         r.account||'',
+    'ek-oked':            r.oked||'',
+    'ek-nds':             r.nds||'',
+    'ek-adapter':         r.adapter||'',
+  };
+  Object.entries(fields).forEach(([id,val])=>{
+    const el=document.getElementById(id); if(el) el.value=val;
+  });
+  const st = document.getElementById('ek-status');
+  if(st) st.value = r.status||'В работе';
+  openModal('mo-edit-kass');
+}
+
+async function saveKassRecord(){
+  const id = document.getElementById('ek-id').value;
+  if(!id){toast("ID не найден","❌");return;}
+  const payload = {
+    contract_number: document.getElementById('ek-contract-number').value.trim(),
+    contract_date:   document.getElementById('ek-contract-date').value,
+    phone_number:    document.getElementById('ek-phone').value.trim(),
+    inn:             document.getElementById('ek-inn').value.trim(),
+    firm_name:       document.getElementById('ek-firm').value.trim(),
+    company_name:    document.getElementById('ek-company').value.trim(),
+    director_name:   document.getElementById('ek-director').value.trim(),
+    kass_number:     document.getElementById('ek-kass-number').value.trim(),
+    address:         document.getElementById('ek-address').value.trim(),
+    serial_number:   document.getElementById('ek-sn').value.trim(),
+    fiscal_module:   document.getElementById('ek-fm').value.trim(),
+    venue_name:      document.getElementById('ek-venue').value.trim(),
+    gni:             document.getElementById('ek-gni').value.trim(),
+    bank:            document.getElementById('ek-bank').value.trim(),
+    mfo:             document.getElementById('ek-mfo').value.trim(),
+    account:         document.getElementById('ek-account').value.trim(),
+    oked:            document.getElementById('ek-oked').value.trim(),
+    nds:             document.getElementById('ek-nds').value.trim(),
+    adapter:         document.getElementById('ek-adapter').value.trim(),
+    status:          document.getElementById('ek-status').value,
+  };
+  try{
+    await db("PATCH","fiscal_kass","id=eq."+id, payload);
+    closeModal('mo-edit-kass');
+    toast("Запись обновлена","✅");
+    loadRegistry();
+  }catch(e){toast("Ошибка: "+e.message.slice(0,50),"❌");}
+}
+
+async function changeKassStatus(id, status){
+  if(!status) return;
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  try{
+    await db("PATCH","fiscal_kass","id=eq."+id,{status});
+    toast("Статус → "+status,"✅");
+    // Обновляем локально без перезагрузки
+    const r = allReg.find(k=>k.id===id); if(r) r.status=status;
+    filterReg();
+  }catch(e){toast("Ошибка: "+e.message.slice(0,40),"❌");}
+}
+
+// ═══════════════════════════════════════════════
+// EDIT SN/FM RECORD — все поля реестра S/N
+// ═══════════════════════════════════════════════
+function openEditSNRecord(id){
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  const r = allSN.find(s => s.id===id);
+  if(!r){toast("Запись не найдена","❌");return;}
+  document.getElementById('esn-id').value = id;
+  document.getElementById('esn-sn').value       = r.sn||'';
+  document.getElementById('esn-fm').value       = r.fiscal_module||'';
+  document.getElementById('esn-inn').value      = r.inn||'';
+  document.getElementById('esn-contract').value = r.contract||'';
+  document.getElementById('esn-venue').value    = r.venue||'';
+  document.getElementById('esn-status').value   = r.status||'';
+  document.getElementById('esn-activity').value = r.activity||'';
+  document.getElementById('esn-tax-status').value= r.tax_status||'';
+  document.getElementById('esn-busy').value     = r.busy ? 'true' : 'false';
+  document.getElementById('esn-comment').value  = r.comment||'';
+  openModal('mo-edit-sn-full');
+}
+
+async function saveSNFullRecord(){
+  const id = document.getElementById('esn-id').value;
+  if(!id){toast("ID не найден","❌");return;}
+  const busyVal = document.getElementById('esn-busy').value === 'true';
+  const payload = {
+    sn:            document.getElementById('esn-sn').value.trim(),
+    fiscal_module: document.getElementById('esn-fm').value.trim(),
+    inn:           document.getElementById('esn-inn').value.trim(),
+    contract:      document.getElementById('esn-contract').value.trim(),
+    venue:         document.getElementById('esn-venue').value.trim(),
+    status:        document.getElementById('esn-status').value,
+    activity:      document.getElementById('esn-activity').value,
+    tax_status:    document.getElementById('esn-tax-status').value.trim(),
+    busy:          busyVal,
+    comment:       document.getElementById('esn-comment').value.trim(),
+  };
+  try{
+    await db("PATCH","fiscal_registry","id=eq."+id, payload);
+    closeModal('mo-edit-sn-full');
+    toast("Запись обновлена","✅");
+    loadSNRegistry();
+  }catch(e){toast("Ошибка: "+e.message.slice(0,50),"❌");}
+}
+
+async function changeSNStatus(id, status){
+  if(!status) return;
+  if(!hasPerm('fiscal_sn')){toast("Нет прав","🔒");return;}
+  try{
+    await db("PATCH","fiscal_registry","id=eq."+id,{status});
+    toast("Статус → "+status,"✅");
+    const r = allSN.find(s=>s.id===id); if(r) r.status=status;
+    filterSNTab(currentSnTab);
+  }catch(e){toast("Ошибка: "+e.message.slice(0,40),"❌");}
+}
+
+// Быстрая проверка S/N и FM
+async function checkSN(){
+  const sn = document.getElementById("sn-sn").value.trim();
+  const fm = document.getElementById("sn-fm").value.trim();
+  const box = document.getElementById("check-result");
+  if(!sn && !fm){toast("Введите S/N или ФМ","⚠️");return;}
+  try{const res = await checkSNFM(sn,fm); renderCheckBox(box,res);}
+  catch(e){box.className="check-box warn show"; box.textContent="Ошибка: "+e.message;}
+}
+
+
+// GOOGLE SHEETS SYNC — прямая интеграция через публичный Apps Script
+// ═══════════════════════════════════════════════════
+let gsHistory = [];
+
+// ══ Лист «iikoFiscal» headers (точно по GS):
+// kass_number | number | contract_date | phone_number | firm_name | director_name |
+// legal_address | inn | bank | mfo | account | oked | company_name | address | gni |
+// serial_number | fiscal_module | venue_name | adapter | kass_name | Активен | NDS | license
+const KASS_COLUMNS = [
+  'kass_number','number','contract_date','phone_number','firm_name','director_name',
+  'legal_address','inn','bank','mfo','account','oked','company_name','address','gni',
+  'serial_number','fiscal_module','venue_name','adapter','kass_name','Активен','NDS','license'
+];
+// GS заголовок → поле в fiscal_kass
+const KASS_ALIASES = {
+  'number':        'contract_number',
+  'kass_name':     'kass_number',
+  'Активен':       'status',
+  'NDS':           'nds',
+};
+
+// ══ Лист «S/N» headers (точно по GS):
+// Фискальный Модуль/KKM | S/N | Статус | ИНН | Активность | Заведение | Договор | Статус в Налогово | Комментарий
+const SN_COLUMNS = [
+  'Фискальный Модуль/KKM','S/N','Статус','ИНН','Активность','Заведение','Договор','Статус в Налогово','Комментарий'
+];
+// GS заголовок → поле в fiscal_registry
+const SN_ALIASES = {
+  'Фискальный Модуль/KKM': 'fiscal_module',
+  'S/N':                   'sn',
+  'Статус':                'status',
+  'ИНН':                   'inn',
+  'Активность':            'activity',
+  'Заведение':             'venue',
+  'Договор':               'contract',
+  'Статус в Налогово':     'tax_status',
+  'Комментарий':           'comment',
+};
+
+// Статусы
+const KASS_STATUSES = ['В работе','Активный','Деактивирован'];
+const SN_STATUSES   = ['Активный','Деактивирован','В работе','Утеря','Порча'];
+
+// Apps Script URL и названия листов
+let APPS_SCRIPT_URL = localStorage.getItem('if_apps_script_url') || '';
+let GS_SHEET_REG = localStorage.getItem('if_sheet_reg') || 'iikoFiscal';
+let GS_SHEET_SN  = localStorage.getItem('if_sheet_sn')  || 'S/N';
+function getSheetName(type){ return type==='registry' ? GS_SHEET_REG : GS_SHEET_SN; }
+
+async function exportToGS(type){
+  if(!hasPerm('fiscal_gs')){toast("Нет прав","🔒");return;}
+
+  if(!APPS_SCRIPT_URL){
+    const url = prompt('Введите URL вашего Google Apps Script Web App:\n(Инструкция: Расширения → Apps Script → Развернуть как веб-приложение)');
+    if(!url){toast("URL не указан — скачиваем CSV","⚠️"); exportCSV(type); return;}
+    APPS_SCRIPT_URL = url.trim();
+    localStorage.setItem('if_apps_script_url', APPS_SCRIPT_URL);
+  }
+
+  const btn = document.getElementById('gs-exp-'+(type==='registry'?'reg':'sn'));
+  const statusEl = document.getElementById('gs-status-'+(type==='registry'?'reg':'sn'));
+  btn.disabled = true; btn.textContent = '⏳ Загрузка...';
+  statusEl.textContent = '⏳ Загружаем данные...';
+
+  try{
+    let data;
+    if(type==='registry'){
+      data = await db("GET","fiscal_kass","select=*&order=id.desc&limit=10000");
+    } else {
+      data = await db("GET","fiscal_registry","select=*&order=id.desc&limit=10000");
+    }
+    if(!data.length){toast("Нет данных","⚠️"); btn.disabled=false; btn.textContent='↑ В Google Sheets'; return;}
+
+    statusEl.textContent = `⏳ Отправляем ${data.length} строк в Google Sheets...`;
+
+    // Normalize data for GS — точное соответствие заголовкам листа
+    const normalized = data.map(r => {
+      if(type==='registry'){
+        // Лист «iikoFiscal»: каждый GS-заголовок → значение из fiscal_kass
+        const row = {};
+        KASS_COLUMNS.forEach(col => {
+          const dbField = KASS_ALIASES[col] || col; // alias или то же имя
+          row[col] = String(r[dbField] ?? r[col] ?? '');
+        });
+        return row;
+      } else {
+        // Лист «S/N»: заголовки SN_COLUMNS → значения из fiscal_registry
+        return {
+          'Фискальный Модуль/KKM': r.fiscal_module||'',
+          'S/N':                   r.sn||'',
+          'Статус':                r.status||'',
+          'ИНН':                   r.inn||'',
+          'Активность':            r.activity||(r.busy?'Активный':''),
+          'Заведение':             r.venue||'',
+          'Договор':               r.contract||'',
+          'Статус в Налогово':     r.tax_status||'',
+          'Комментарий':           r.comment||'',
+        };
+      }
+    });
+
+    const sheetName = getSheetName(type);
+    // Apps Script не поддерживает POST через JSONP — используем GET с данными по частям
+    // Сначала отправляем заголовки, потом данные батчами
+    const result = await callGS({action:'write', sheet:sheetName, count:normalized.length,
+      data: encodeURIComponent(JSON.stringify(normalized.slice(0,200)))});
+    if(normalized.length > 200){
+      for(let i=200; i<normalized.length; i+=200){
+        await callGS({action:'append', sheet:sheetName,
+          data: encodeURIComponent(JSON.stringify(normalized.slice(i,i+200)))});
+      }
+    }
+    if(result.status === 'ok'){
+      const entry = {type:'export',table:sheetName,count:data.length,time:new Date().toLocaleString('ru',{timeZone:'Asia/Tashkent'}),user:ME.name};
+      gsHistory.unshift(entry); saveGsHistory(); renderGsHistory();
+      statusEl.textContent = `✅ Отправлено ${data.length} строк · ${entry.time}`;
+      toast(`✅ Google Sheets обновлён: ${data.length} строк`,"✅");
+    } else {
+      throw new Error(result.message||'Ошибка Apps Script');
+    }
+  }catch(e){
+    console.warn('Apps Script error, falling back to CSV:', e.message);
+    statusEl.textContent = '⚠️ Apps Script недоступен → скачиваем CSV';
+    exportCSV(type);
+  }
+  btn.disabled = false; btn.textContent = '↑ В Google Sheets';
+}
+
+// Резервный CSV экспорт
+async function exportCSV(type){
+  try{
+    let data, filename;
+    if(type==='registry'){
+      data = await db("GET","fiscal_kass","select=*&order=id.desc&limit=10000");
+      filename = 'Реестр_договоров_'+new Date().toISOString().slice(0,10)+'.csv';
+    } else {
+      data = await db("GET","fiscal_registry","select=*&order=id.desc&limit=10000");
+      filename = 'Реестр_ФМ_SN_'+new Date().toISOString().slice(0,10)+'.csv';
+    }
+    if(!data.length){toast("Нет данных","⚠️"); return;}
+    const headers = Object.keys(data[0]);
+    const csv = [headers.join(',')].concat(
+      data.map(r => headers.map(h => {
+        const v = r[h]===null||r[h]===undefined ? '' : String(r[h]);
+        return '"'+v.replace(/"/g,'""')+'"';
+      }).join(','))
+    ).join('\r\n');
+    const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename; a.click();
+    URL.revokeObjectURL(a.href);
+    toast("CSV скачан (импортируйте в Google Sheets вручную)","📄");
+  }catch(e){toast("Ошибка: "+e.message,"❌");}
+}
+
+async function importFromGS(type, input){
+  if(!hasPerm('fiscal_gs')){toast("Нет прав","🔒"); return;}
+  const file = input.files[0]; if(!file) return;
+  const statusEl = document.getElementById('gs-status-'+(type==='registry'?'reg':'sn'));
+
+  // Если задан Apps Script — читаем через JSONP
+  if(APPS_SCRIPT_URL){
+    statusEl.textContent = '⏳ Читаем из Google Sheets...';
+    try{
+      const sheetName = getSheetName(type);
+      const result = await callGS({action:'read', sheet:sheetName});
+      if(result.status === 'ok' && result.data){
+        if(result.data.length === 0){
+          toast(`Лист «${sheetName}» пуст или не найден. Проверьте название.`,"⚠️");
+          statusEl.textContent = `⚠️ Лист «${sheetName}» пуст. Проверьте название в настройках.`;
+          input.value = ''; return;
+        }
+        await processImportData(type, result.data, statusEl);
+        input.value = ''; return;
+      }
+    }catch(e){
+      console.warn('JSONP failed:', e.message);
+      statusEl.textContent = '⚠️ '+e.message.slice(0,60)+' — пробуем CSV файл...';
+    }
+  }
+  // Fallback: читаем загруженный CSV
+  statusEl.textContent = '⏳ Читаем CSV файл...';
+  try{
+    const text = await file.text();
+    const lines = text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l => l.trim());
+    if(lines.length < 2){toast("Файл пуст","⚠️"); return;}
+
+    const headers = parseCsvLine(lines[0]).map(h => h.trim());
+    console.log('CSV headers:', headers);
+
+    const rows = lines.slice(1).map(l => {
+      const vals = parseCsvLine(l);
+      const obj = {};
+      headers.forEach((col, i) => {
+        let val = (vals[i]||'').trim();
+        if(!val) return;
+        if(['id','contract_id','created_by'].includes(col)) return; // skip PK fields
+        obj[col] = val; // сохраняем с оригинальным GS-заголовком, processImportData конвертирует
+      });
+      return obj;
+    }).filter(r => Object.keys(r).length > 0);
+
+    await processImportData(type, rows, statusEl);
+  }catch(e){
+    toast("Ошибка импорта: "+e.message.slice(0,50),"❌");
+    statusEl.textContent = "❌ Ошибка";
+  }
+  input.value = '';
+}
+
+async function processImportData(type, rows, statusEl){
+  const table = type==='registry' ? 'fiscal_kass' : 'fiscal_registry';
+  statusEl.textContent = `⏳ Импорт ${rows.length} строк...`;
+  let imported = 0, skipped = 0, errors = [];
+
+  // Строгий whitelist полей таблиц — только реальные колонки Supabase
+  const KASS_DB_FIELDS = new Set([
+    'contract_number','contract_date','kass_number','address','gni',
+    'serial_number','fiscal_module','venue_name','adapter','status','phone_number',
+    'firm_name','company_name','director_name','legal_address','inn','bank','mfo',
+    'account','oked','nds'
+  ]);
+  const SN_DB_FIELDS = new Set([
+    'sn','fiscal_module','status','inn','activity','venue','contract',
+    'tax_status','comment','busy'
+  ]);
+
+  // Конвертируем GS-заголовки → поля БД с жёсткой фильтрацией
+  const mapped = rows.map(r => {
+    const out = {};
+    if(type==='registry'){
+      // Явный маппинг GS-заголовок → db поле
+      // Явный маппинг GS заголовок → поле в fiscal_kass
+      // ТОЛЬКО реальные поля таблицы, без дублей
+      const gsToDb = {
+        'kass_number':    'kass_number',
+        'number':         'contract_number',
+        'contract_date':  'contract_date',
+        'phone_number':   'phone_number',
+        'firm_name':      'firm_name',
+        'director_name':  'director_name',
+        'legal_address':  'legal_address',
+        'inn':            'inn',
+        'bank':           'bank',
+        'mfo':            'mfo',
+        'account':        'account',
+        'oked':           'oked',
+        'company_name':   'company_name',
+        'address':        'address',
+        'gni':            'gni',
+        'serial_number':  'serial_number',
+        'fiscal_module':  'fiscal_module',
+        'venue_name':     'venue_name',
+        'adapter':        'adapter',
+        'Активен':        'status',
+        'NDS':            'nds',
+        // kass_name — резервный, только если kass_number не заполнен
+      };
+      Object.entries(gsToDb).forEach(([gsCol, dbField]) => {
+        if(!KASS_DB_FIELDS.has(dbField)) return;
+        if(!gsCol || gsCol.trim()==='') return; // пропуск пустых заголовков
+        const val = String(r[gsCol] ?? '').replace(/\n/g,' ').replace(/\r/g,'').replace(/\t/g,' ').trim();
+        if(val) out[dbField] = val;
+      });
+      // kass_name как fallback если kass_number пуст
+      if(!out.kass_number && r['kass_name']){
+        const v = String(r['kass_name']).trim();
+        if(v) out.kass_number = v;
+      }
+    } else {
+      // Лист «S/N» → fiscal_registry
+      const gsToDb = {
+        'Фискальный Модуль/KKM': 'fiscal_module',
+        'S/N':                   'sn',
+        'Статус':                'status',
+        'ИНН':                   'inn',
+        'Активность':            'activity',
+        'Заведение':             'venue',
+        'Договор':               'contract',
+        'Статус в Налогово':     'tax_status',
+        'Комментарий':           'comment',
+      };
+      Object.entries(gsToDb).forEach(([gsCol, dbField]) => {
+        if(!SN_DB_FIELDS.has(dbField)) return;
+        const val = String(r[gsCol] ?? '').replace(/\n/g,' ').replace(/\r/g,'').trim();
+        if(val){
+          if(dbField === 'busy') out[dbField] = (val.toLowerCase()==='да'||val==='true'||val==='1');
+          else out[dbField] = val;
+        }
+      });
+    }
+    return out;
+  }).filter(r => Object.keys(r).length > 0);
+
+  // Upsert: обновляем существующие записи вместо вставки дублей
+  const upsertHeader = {...SH, "Prefer":"resolution=merge-duplicates,return=representation"};
+  for(let i = 0; i < mapped.length; i += 50){
+    try{
+      const batch = mapped.slice(i,i+50);
+      const o = {method:'POST', headers:upsertHeader, body:JSON.stringify(batch)};
+      const r = await fetch(SB+'/rest/v1/'+table+'?on_conflict='+(type==='registry'?'serial_number':'sn'), o);
+      if(!r.ok){
+        // fallback: вставляем по одному, пропуская конфликты
+        let batchAdded = 0;
+        for(const row of batch){
+          try{
+            const r2 = await fetch(SB+'/rest/v1/'+table, {method:'POST',headers:SH,body:JSON.stringify(row)});
+            if(r2.ok||r2.status===409) batchAdded++;
+          }catch(e2){}
+        }
+        imported += batchAdded;
+        skipped += batch.length - batchAdded;
+      } else {
+        imported += batch.length;
+      }
+      statusEl.textContent = `⏳ Импорт: ${imported}/${mapped.length}...`;
+    }catch(e){
+      errors.push(e.message.slice(0,80));
+      skipped += Math.min(50, mapped.length-i);
+    }
+  }
+
+  const entry = {type:'import',table:type==='registry'?'iikoFiscal':'S/N',count:imported,time:new Date().toLocaleString('ru',{timeZone:'Asia/Tashkent'}),user:ME.name};
+  gsHistory.unshift(entry); saveGsHistory(); renderGsHistory();
+
+  statusEl.textContent = `✅ Импортировано ${imported}${skipped?' · Пропущено: '+skipped:''} · ${entry.time}`;
+  if(errors.length) console.error('Import errors:', errors);
+  toast(`Импорт завершён: ${imported} строк`+(skipped?`, пропущено: ${skipped}`:'')+(errors.length?` (ошибок: ${errors.length})`:''),"✅");
+  if(type==='registry') loadRegistry(); else loadSNRegistry();
+}
+
+function parseCsvLine(line){
+  const result = []; let cur = ''; let inQ = false;
+  for(let i = 0; i < line.length; i++){
+    if(line[i]==='"'){if(inQ && line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(line[i]===',' && !inQ){result.push(cur);cur='';}
+    else cur+=line[i];
+  }
+  result.push(cur); return result;
+}
+
+function saveGsHistory(){ localStorage.setItem("if_gs_history", JSON.stringify(gsHistory.slice(0,50))); }
+function loadGsHistory(){ gsHistory = JSON.parse(localStorage.getItem("if_gs_history")||"[]"); renderGsHistory(); }
+function renderGsHistory(){
+  const el = document.getElementById("gs-history"); if(!el) return;
+  if(!gsHistory.length){el.textContent="Нет данных";return;}
+  el.innerHTML = gsHistory.slice(0,10).map(e => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${e.type==='export'?'↑':'↓'}</span>
+      <span style="color:${e.type==='export'?'var(--accent)':'var(--ok)'};font-size:10px;font-weight:600">${e.type==='export'?'Экспорт':'Импорт'}</span>
+      <span style="color:var(--t2);font-size:10px">${e.table}</span>
+      <span style="color:var(--ok);font-size:10px">${e.count} строк</span>
+      <span style="color:var(--t3);font-size:9px;margin-left:auto">${e.time} · ${e.user}</span>
+    </div>`).join('');
+}
+
+
+// CLEAR FORM
+// ═══════════════════════════════════════════════
+function clearForm(){
+  ["c-number","c-date","c-phone","c-inn","c-firm","c-company","c-director","c-nds","c-legal","c-bank","c-mfo","c-account","c-oked"].forEach(id=>{
+    const el=document.getElementById(id);if(el){el.value="";el.classList.remove("err");}
+  });
+  document.getElementById("addr-container").innerHTML="";
+  addrCount=0;addresses=[];kassData={};stepsCompleted=0;
+  setStep(0);
+  document.getElementById("c-date").value=new Date().toISOString().slice(0,10);
+}
+
+// ═══════════════════════════════════════════════
+// CLOCK / THEME / SIDEBAR / UTILS
+// ═══════════════════════════════════════════════
+function tick(){
+  document.getElementById("top-time").textContent=new Intl.DateTimeFormat('ru',{timeZone:'Asia/Tashkent',hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date());
+}
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme",t);
+  const d=t==="dark";
+  document.getElementById("t-ico").textContent=d?"🌙":"☀️";
+  document.getElementById("t-lbl").textContent=d?"Тёмная":"Светлая";
+  const sw=document.getElementById("t-sw");d?sw.classList.add("on"):sw.classList.remove("on");
+  localStorage.setItem("if_theme",t);
+}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");}
+function toggleSb(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("overlay").classList.toggle("show");}
+function closeSb(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
+function openModal(id){document.getElementById(id).classList.add("show");}
+function closeModal(id){document.getElementById(id).classList.remove("show");}
+document.querySelectorAll(".modal-bg").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show");}));
+let tT;
+function toast(msg,ico="✅"){
+  document.getElementById("t-msg").textContent=msg;document.getElementById("t-ico2").textContent=ico;
+  const el=document.getElementById("toast");el.classList.add("show");
+  clearTimeout(tT);tT=setTimeout(()=>el.classList.remove("show"),3400);
+}
+function x(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+async function checkConnection(){
+  db("GET","fiscal_contracts","select=id&limit=1").then(()=>{
+    document.getElementById("cdot").style.background="var(--accent)";
+    document.getElementById("conn-txt").textContent="Подключено";
+  }).catch(()=>{
+    document.getElementById("cdot").style.background="var(--danger)";
+    document.getElementById("conn-txt").textContent="Ошибка";
+  });
+}
+
+// ═══════════════════════════════════════════════
+// PDF GENERATION
+// ═══════════════════════════════════════════════
+function formatDateRu(iso){
+  if(!iso)return'';
+  const[y,m,d]=iso.split('-');
+  const mn=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return`${parseInt(d)} ${mn[parseInt(m)-1]} ${y} г.`;
+}
+function rq(label,rows){return`<td><b>${label}</b><br>${rows.map(r=>`${r}<br>`).join('')}</td>`;}
+
+function buildDogovorHTML(c,kass){
+  const srv=[['1','Консультации по вопросам эксплуатации виртуальной кассы (почасовая)','180 000'],['2','Выезд специалиста для диагностики и настройки (почасовая)','150 000'],['3','Дистанционная диагностика и настройка (почасовая)','100 000'],['4','Работы по замене и активации фискального модуля','180 000'],['5','Обязательное ежегодное техническое обслуживание','55 000'],['6','Замена фискального модуля (порча, утеря)','1 БРВ'],['7','Техническое обслуживание – сопровождение ПО Виртуальной кассы','190 000'],['8','Обновление ПО «iiko Fiscal» для соответствия требованиям законодательства','Бесплатно']];
+  const ktbl=kass.map((k,i)=>`<tr><td class="tc">${i+1}</td><td>ПОФМ</td><td>${k.fm||'—'}</td><td>${k.address||'—'}</td><td class="tc">1</td></tr>`).join('');
+  return`
+<div class="pg">
+<p class="h1">ДОГОВОР НА ОКАЗАНИЕ УСЛУГ № ${c.number} -IF</p>
+<p class="hl"><span>г. Ташкент</span><span>${c.contract_date}</span></p>
+<p class="p i">ООО "KAFESOFT GROUP", именуемый в дальнейшем «Исполнитель» в лице директора Шалабаева Д.Е., действующего на основании Устава с одной стороны, и <b>${c.firm_name}</b> именуемое в дальнейшем «Заказчик» в лице директора <b>${c.director_name}</b>, действующего на основании Устава, с другой стороны заключили Договор о нижеследующем:</p>
+<p class="h2">ТЕРМИНЫ И ОПРЕДЕЛЕНИЯ</p>
+<p class="p i">«Исполнитель» — юридическое лицо, уполномоченное предоставлять бесперебойные сервисные услуги пользователям виртуальных касс в соответствии с «Положением», утверждённым 23.11.19г. ПКМ РУз №943.</p>
+<p class="p i">Программное обеспечение виртуальная касса — программный продукт, формирующий фискальные документы и обеспечивающий передачу данных в режиме реального времени.</p>
+<p class="p i">Фискальный модуль — специализированное физическое устройство, обеспечивающее криптографическую защиту фискальных данных.</p>
+<p class="h2">ПРЕДМЕТ ДОГОВОРА</p>
+<p class="p">1.1. Передача права пользования копией ПО виртуальная касса «iiko Fiscal» (версия 8.6.7005.0), внесённой Протоколом №42 от 01.08.2024 г. в государственный реестр онлайн ККМ.</p>
+<p class="p">1.2. Произвести запись и установку виртуальной кассы на компьютерные устройства Заказчика.</p>
+<p class="p">1.3. Ежемесячное обязательное сопровождение виртуальных касс.</p>
+<p class="p">1.4. Оказывать иные услуги в рамках сервисного обслуживания по запросу Заказчика.</p>
+<p class="h2">ПОРЯДОК ОКАЗАНИЯ УСЛУГ</p>
+<p class="p">2.1. Исполнитель в течение 5 (пяти) дней после получения оплаты осуществляет регистрацию виртуальной кассы и отправляет данные органам налоговой службы.</p>
+<p class="p">2.2. Исполнитель предоставляет фискальный модуль в течение одного рабочего дня с момента получения подтверждения о регистрации.</p>
+<p class="p">2.3. Оплата взимается за каждую установленную виртуальную кассу.</p>
+<p class="h2">ПРАВА И ОБЯЗАННОСТИ СТОРОН</p>
+<p class="p b">3.1. Исполнитель обязан: произвести регистрацию; осуществить запись и установку; передать фискальный модуль; настроить взаимодействие «iiko Fiscal» и фискального модуля; протестировать корректность работы; предоставить документацию.</p>
+<p class="p b">3.2. Заказчик обязан: оплатить услуги; предоставить документы; сообщать о неисправностях; пользоваться кассой согласно документации.</p>
+<p class="h2">СТОИМОСТЬ УСЛУГ И ПОРЯДОК РАСЧЁТОВ</p>
+<p class="p">4.1. Стоимость записи и установки одной виртуальной кассы: <b>500 000,00 сўм</b> без НДС.</p>
+<p class="p">4.2. Ежемесячная абонентская плата за сопровождение одной кассы: <b>190 000,00 сўм</b> без НДС.</p>
+<p class="p">4.3. Оплата за запись и установку — в течение 5 дней после подписания. Абонентская плата — не позже 5 дней начала каждого периода.</p>
+<p class="h2">СРОК ДЕЙСТВИЯ И ЗАКЛЮЧИТЕЛЬНЫЕ ПОЛОЖЕНИЯ</p>
+<p class="p">5.1. Договор заключён на 12 месяцев. При отсутствии уведомления — автоматически продлевается.</p>
+<p class="p">5.2. Договор составлен в двух экземплярах равной юридической силы.</p>
+<p class="h2">АДРЕСА И БАНКОВСКИЕ РЕКВИЗИТЫ СТОРОН</p>
+<table class="tb"><tr>
+${rq('«Исполнитель»',['ООО "KAFESOFT GROUP"','г. Ташкент, Шайхонтохурский р-н, ул. Тахтапул Дарбоза, 328','р/с 20208000407014644001','АКБ Капитал банк · МФО 01158','ИНН 311126785 · ОКЭД 62020'])}
+${rq('«Заказчик»',['<b>'+c.firm_name+'</b>','Адрес: '+c.legal_address,'р/с '+c.account,c.bank+' · МФО '+c.mfo,'ИНН '+c.inn+' · ОКЭД '+c.oked])}
+</tr></table>
+<div class="sig"><div class="sc"><p class="b">Директор:</p><div class="sl"></div><p>________________/Шалабаев Д.Е./</p></div><div class="sc"><p class="b">Директор:</p><div class="sl"></div><p>________________/${c.director_name}/</p></div></div>
+</div>
+<div class="pg">
+<p class="tr">Приложение №1 к Договору № ${c.number} -IF от ${c.contract_date}</p>
+<p class="h1">Перечень дополнительных услуг</p>
+<table class="tb"><thead><tr><th style="width:5%">№</th><th>Вид услуг</th><th style="width:22%">Цена, сўм (без НДС)</th></tr></thead>
+<tbody>${srv.map(([n,s,p])=>`<tr><td class="tc">${n}</td><td>${s}</td><td class="tr">${p}</td></tr>`).join('')}</tbody></table>
+<p class="p sm">Выезд специалиста — только в пределах г. Ташкент.</p>
+<table class="tb" style="margin-top:16px"><tr>
+${rq('«Исполнитель»',['ООО "KAFESOFT GROUP"','р/с 20208000407014644001, АКБ Капитал банк','МФО 01158 · ИНН 311126785 · ОКЭД 62020'])}
+${rq('«Заказчик»',['<b>'+c.firm_name+'</b>','р/с '+c.account+', '+c.bank,'МФО '+c.mfo+' · ИНН '+c.inn+' · ОКЭД '+c.oked])}
+</tr></table>
+<div class="sig"><div class="sc"><div class="sl"></div><p>________________/Шалабаев Д.Е./</p></div><div class="sc"><div class="sl"></div><p>________________/${c.director_name}/</p></div></div>
+</div>
+<div class="pg">
+<p class="tr">Приложение №2 к Договору № ${c.number} -IF от ${c.contract_date}</p>
+<p class="h1">АКТ приёма-передачи оборудования</p>
+<p class="hl"><span>г. Ташкент</span><span>${c.contract_date}</span></p>
+<p class="p i">ООО "KAFESOFT GROUP" в лице директора Шалабаева Д.Е. и <b>${c.firm_name}</b> в лице директора <b>${c.director_name}</b>, составили настоящий Акт о нижеследующем:</p>
+<p class="p">1. Во исполнение Договора <b>${c.number} -IF</b> от ${c.contract_date} Исполнитель поставил, а Заказчик принял оборудование:</p>
+<table class="tb"><thead><tr><th style="width:5%">№</th><th style="width:14%">Наим.</th><th style="width:20%">ФМ</th><th>Адрес</th><th style="width:8%">Кол.</th></tr></thead>
+<tbody>${ktbl}</tbody>
+<tfoot><tr><td colspan="4" class="tr b">Итого:</td><td class="tc b">${kass.length}</td></tr></tfoot></table>
+<p class="p">2. Товар передан. 3. Претензий нет. 4. Недостатки: _____________ 5. Акт в 2 экземплярах.</p>
+<div class="sig"><div class="sc"><p class="b">«Исполнитель» ООО "KAFESOFT GROUP"</p><div class="sl"></div><p>________________/Шалабаев Д.Е./</p></div><div class="sc"><p class="b">«Заказчик» ${c.firm_name}</p><div class="sl"></div><p>________________/${c.director_name}/</p></div></div>
+</div>`;
+}
+
+function buildZayavlenieHTML(c,k){
+  return`<div class="pg">
+<div class="pzto">Руководитель ООО "KAFESOFT GROUP"<br>для руководителя ${k.gni||'ГНИ'}</div>
+<p class="h1" style="margin-top:24px">ЗАЯВЛЕНИЕ</p>
+<p class="p" style="text-align:center;font-size:9.5pt">(О регистрации онлайн-ККМ или виртуальной кассы в органах Государственной налоговой службы)</p>
+<p class="p i" style="margin-top:18px">Прошу оказать практическую помощь в регистрации в <b>${k.gni||'ГНИ'}</b> онлайн-ККМ (виртуальной кассы): марка <b>iiko Fiscal</b>, заводской номер <b>${k.sn||'—'}</b> и фискального модуля за номером <b>${k.fm||'—'}</b> в стационарном пункте <b>${k.venue||'—'}</b> по адресу <b>${k.address||'—'}</b>, принадлежащем <b>"${c.firm_name}"</b>, ИНН <b>${c.inn}</b>.</p>
+<p class="p b" style="margin-top:14px">Данные документы прикреплены:</p>
+<p class="p">— Копии документов, подтверждающих наличие стационарного пункта.</p>
+<p class="p">— Копия договора с ЦТО на техническое обслуживание.</p>
+<p class="p">— Координаты торговой точки на карте.</p>
+<div class="sig" style="margin-top:36px">
+<div class="sc"><p class="b">Шалабаев Д.Е.</p><p class="sm">ТХКМ раҳбари</p><div class="sl"></div><p class="sm">Подпись _______ Дата: ${c.contract_date}</p></div>
+<div class="sc"><p class="b">${c.director_name}</p><p class="sm">Ф.И.О. руководителя</p><div class="sl"></div><p class="sm">Тел: ${c.phone_number} &nbsp; Подпись _______ Дата: ______</p></div>
+</div>
+</div>`;
+}
+
+async function downloadAllPDF(){
+  if(!hasPerm('fiscal_reg')&&!hasPerm('fiscal_view')){toast("Нет прав","🔒");return;}
+  const btn=document.getElementById('pdf-btn');btn.disabled=true;btn.textContent='⏳ Генерация...';
+  try{
+    const c={number:v("c-number"),contract_date:formatDateRu(v("c-date")),phone_number:v("c-phone"),inn:v("c-inn"),firm_name:v("c-firm"),company_name:v("c-company"),director_name:v("c-director"),nds:v("c-nds")||"Нет",legal_address:v("c-legal"),bank:v("c-bank"),mfo:v("c-mfo"),account:v("c-account"),oked:v("c-oked")};
+    const allKass=[];
+    addresses.forEach((a,ai)=>{(kassData[ai]||[]).forEach(k=>{allKass.push({...k,address:a.address});});});
+    let html=buildDogovorHTML(c,allKass);
+    allKass.forEach(k=>{html+=buildZayavlenieHTML(c,k);});
+    const CSS=`*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Times New Roman',Times,serif;font-size:11pt;color:#000;background:#fff}
+.pg{width:210mm;min-height:297mm;padding:20mm 20mm 20mm 25mm;background:#fff;page-break-after:always}
+.h1{font-size:13pt;font-weight:bold;text-align:center;margin:0 0 10px}.h2{font-size:11pt;font-weight:bold;text-align:center;margin:12px 0 5px;text-transform:uppercase}
+.p{font-size:10.5pt;text-align:justify;margin:4px 0;line-height:1.55}.i{text-indent:1.25cm}.b{font-weight:bold}.sm{font-size:9.5pt}
+.hl{display:flex;justify-content:space-between;margin-bottom:8px;font-size:10.5pt}.tr{text-align:right}.tc{text-align:center}
+.pzto{text-align:right;font-size:10.5pt;line-height:1.9;margin-bottom:8px}
+.tb{width:100%;border-collapse:collapse;margin:7px 0;font-size:9.5pt}
+.tb th{background:#e6e6e6;border:1px solid #555;padding:4px 6px;font-weight:bold;text-align:center}
+.tb td{border:1px solid #888;padding:3px 6px;vertical-align:top}.tb tfoot td{background:#f0f0f0;font-weight:bold}
+.sig{display:flex;justify-content:space-between;margin-top:18px}.sc{width:46%}.sl{border-bottom:1px solid #000;margin:16px 0 4px}
+@media print{body{margin:0}.pg{page-break-after:always;margin:0;padding:20mm 20mm 20mm 25mm}@page{size:A4;margin:0}}`;
+    const fullDoc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Договор ${c.number}</title><style>${CSS}</style></head><body onload="setTimeout(function(){window.print()},500)">${html}</body></html>`;
+    const blob=new Blob([fullDoc],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    window.open(url,'_blank','width=1000,height=800');
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    toast(`📄 Открыто окно: договор + акт + ${allKass.length} заявлений`,'✅');
+  }catch(e){toast('Ошибка: '+e.message,'❌');}
+  btn.disabled=false;btn.textContent='📄 Скачать PDF';
+}
+
+// ═══════════════════════════════════════════════
+// GOOGLE SHEETS HELPERS
+// ═══════════════════════════════════════════════
+// Google Apps Script — через публичный CORS proxy
+// corsproxy.io проксирует запросы к Apps Script без ограничений
+async function callGS(params){
+  if(!APPS_SCRIPT_URL) throw new Error('No URL');
+  const qs = Object.entries(params).map(([k,v])=>k+'='+encodeURIComponent(String(v))).join('&');
+  const target = APPS_SCRIPT_URL + (APPS_SCRIPT_URL.includes('?')?'&':'?') + qs;
+  // Пробуем прямой fetch (работает если Apps Script возвращает CORS)
+  // Fallback: corsproxy.io
+  let resp, text;
+  try{
+    resp = await fetch(target, {redirect:'follow', signal: AbortSignal.timeout(8000)});
+    text = await resp.text();
+  } catch(e) {
+    // Прямой запрос не работает — используем CORS proxy
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(target);
+    resp = await fetch(proxyUrl, {redirect:'follow', signal: AbortSignal.timeout(12000)});
+    text = await resp.text();
+  }
+  if(!text) throw new Error('Пустой ответ от Apps Script');
+  // Убираем возможный JSONP wrapper
+  const clean = text.replace(/^[^({\[]*[(]/, '').replace(/[)][\s;]*$/, '').trim();
+  try { return JSON.parse(clean); }
+  catch(e) { throw new Error('Не JSON: '+text.slice(0,150)); }
+}
+
+async function testAppsScript(){
+  const url = document.getElementById('apps-script-url').value.trim();
+  if(!url){toast("Введите URL Apps Script","⚠️");return;}
+  const el = document.getElementById('apps-script-status');
+  el.innerHTML = '⏳ Проверка...'; el.style.color='var(--t2)';
+  try{
+    APPS_SCRIPT_URL = url;
+    localStorage.setItem('if_apps_script_url', url);
+
+    // 1. Ping
+    el.innerHTML = '⏳ Шаг 1/3: ping...';
+    const ping = await callGS({action:'ping'});
+    if(ping.status!=='ok') throw new Error('Ping failed: '+(ping.message||JSON.stringify(ping)));
+
+    // 2. Читаем лист iikoFiscal
+    el.innerHTML = '⏳ Шаг 2/3: читаем лист «'+GS_SHEET_REG+'»...';
+    const regResult = await callGS({action:'read', sheet: GS_SHEET_REG});
+
+    // 3. Читаем лист S/N
+    el.innerHTML = '⏳ Шаг 3/3: читаем лист «'+GS_SHEET_SN+'»...';
+    const snResult  = await callGS({action:'read', sheet: GS_SHEET_SN});
+
+    // Показываем детальный результат
+    const regRows = regResult.data ? regResult.data.length : 0;
+    const snRows  = snResult.data  ? snResult.data.length  : 0;
+    const regKeys = regResult.data && regResult.data[0] ? Object.keys(regResult.data[0]).join(', ') : '—';
+    const snKeys  = snResult.data  && snResult.data[0]  ? Object.keys(snResult.data[0]).join(', ')  : '—';
+
+    el.innerHTML = `
+      <div style="color:var(--ok);font-weight:600;margin-bottom:6px">✅ Подключено!</div>
+      <div style="color:var(--t2);margin-bottom:4px">
+        📋 <b style="color:var(--text)">${GS_SHEET_REG}</b>:
+        <span style="color:var(--accent)">${regRows} строк</span>
+        ${regRows>0?'<br><span style="font-size:9px;color:var(--t3)">Заголовки: '+regKeys+'</span>':'<span style="color:var(--warn)"> ⚠️ Пусто</span>'}
+      </div>
+      <div style="color:var(--t2)">
+        📦 <b style="color:var(--text)">${GS_SHEET_SN}</b>:
+        <span style="color:var(--accent)">${snRows} строк</span>
+        ${snRows>0?'<br><span style="font-size:9px;color:var(--t3)">Заголовки: '+snKeys+'</span>':'<span style="color:var(--warn)"> ⚠️ Пусто</span>'}
+      </div>
+      ${(regRows===0||snRows===0)?'<div style="color:var(--warn);margin-top:6px;font-size:10px">⚠️ Проверь названия листов ниже — они должны точно совпадать с вкладками в таблице</div>':''}
+    `;
+    el.style.color='';
+  }catch(e){
+    el.innerHTML = '<span style="color:var(--danger)">❌ '+x(e.message.slice(0,120))+'</span>';
+    el.style.color='';
+  }
+}
+
+async function importFromGSdirect(type){
+  if(!APPS_SCRIPT_URL){ document.getElementById('gs-imp-'+(type==='registry'?'reg':'sn')).click(); return; }
+  const statusEl = document.getElementById('gs-status-'+(type==='registry'?'reg':'sn'));
+  const sheetName = getSheetName(type);
+  statusEl.textContent = `⏳ Читаем лист «${sheetName}»...`;
+  try{
+    const result = await callGS({action:'read', sheet:sheetName});
+    console.log('[GS import] raw result:', JSON.stringify(result).slice(0,500));
+    if(!result || result.status !== 'ok'){
+      throw new Error(result?.message || 'Apps Script error: '+JSON.stringify(result).slice(0,100));
+    }
+    if(!result.data || result.data.length === 0){
+      statusEl.innerHTML = `<span style="color:var(--warn)">⚠️ Лист «<b>${sheetName}</b>» пуст или не найден.<br>
+        Убедись что вкладка называется именно <b>${sheetName}</b> (регистр важен!).<br>
+        Открой F12 → Console для деталей.</span>`;
+      return;
+    }
+    const gsHeaders = Object.keys(result.data[0]);
+    console.log('[GS import] sheet headers:', gsHeaders);
+    statusEl.textContent = `⏳ Получено ${result.data.length} строк (заголовки: ${gsHeaders.slice(0,4).join(', ')}...), импортируем...`;
+    if(result.status==='ok' && result.data){
+      await processImportData(type, result.data, statusEl);
+    } else throw new Error(result.message||'Ошибка чтения');
+  }catch(e){
+    statusEl.textContent = '⚠️ Прямой импорт недоступен → загрузите CSV файл';
+    document.getElementById('gs-imp-'+(type==='registry'?'reg':'sn')).click();
+  }
+}
+
+function showAppsScriptInstructions(){
+  const code = `// iikoFiscal — Google Apps Script v2 (CORS, без JSONP)
+// 1. Расширения → Apps Script → вставьте код (замените всё содержимое)
+// 2. Развернуть → НОВОЕ развёртывание → Тип: Веб-приложение
+// 3. Выполнять как: Я, Доступ: Все (в т.ч. анонимные)
+// 4. Скопируйте новый URL (не старый!)
+
+function doGet(e){
+  const p = e.parameter;
+  const action = p.action || 'ping';
+  const cb = p.callback; // JSONP callback
+  let result;
+  try{
+    if(action==='ping')        result = {status:'ok', message:'Connected! v3'};
+    else if(action==='read')   result = {status:'ok', data: readSheet(p.sheet)};
+    else if(action==='write')  result = writeSheet(p.sheet, JSON.parse(decodeURIComponent(p.data||'[]')));
+    else if(action==='append') result = appendSheet(p.sheet, JSON.parse(decodeURIComponent(p.data||'[]')));
+    else result = {status:'error', message:'Unknown action: '+action};
+  }catch(err){
+    result = {status:'error', message: err.toString()};
+  }
+  const json = JSON.stringify(result);
+  // Поддержка JSONP (callback параметр) и обычного JSON
+  const output = cb ? cb + '(' + json + ')' : json;
+  const mime = cb ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
+  return ContentService.createTextOutput(output).setMimeType(mime);
+}
+
+function readSheet(name){
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(name);
+  if(!sh) return [];
+  const rows = sh.getDataRange().getValues();
+  if(rows.length < 2) return [];
+  const hdr = rows[0].map(String);
+  return rows.slice(1)
+    .filter(r => r.some(c => c !== '' && c !== null && c !== undefined))
+    .map(r => {
+      const o = {};
+      hdr.forEach((h,i) => { o[h] = r[i] !== undefined && r[i] !== null ? String(r[i]) : ''; });
+      return o;
+    });
+}
+
+function writeSheet(name, data){
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(name);
+  if(!sh) sh = ss.insertSheet(name);
+  sh.clearContents();
+  if(!data || !data.length) return {status:'ok', message:'No data'};
+  const hdr = Object.keys(data[0]);
+  const rows = [hdr].concat(data.map(r => hdr.map(h => r[h] || '')));
+  sh.getRange(1,1,rows.length,hdr.length).setValues(rows);
+  sh.getRange(1,1,1,hdr.length).setFontWeight('bold').setBackground('#e8f0fe');
+  return {status:'ok', message:'Written '+data.length+' rows to '+name};
+}
+
+function appendSheet(name, data){
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(name);
+  if(!sh) return writeSheet(name, data);
+  if(!data || !data.length) return {status:'ok'};
+  const lastRow = sh.getLastRow();
+  const hdr = lastRow > 0
+    ? sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(String)
+    : Object.keys(data[0]);
+  if(lastRow === 0){
+    sh.getRange(1,1,1,hdr.length).setValues([hdr]);
+  }
+  sh.getRange(lastRow+1,1,data.length,hdr.length)
+    .setValues(data.map(r => hdr.map(h => r[h] || '')));
+  return {status:'ok', message:'Appended '+data.length+' rows to '+name};
+}`;
+
+const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `<div style="background:var(--surface);border:1px solid var(--b2);border-radius:12px;padding:22px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto">
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px">📋 Инструкция: Google Apps Script</div>
+    <ol style="font-size:11px;line-height:2;color:var(--t2);padding-left:16px">
+      <li>Откройте вашу Google Таблицу с данными</li>
+      <li>Меню: <strong style="color:var(--text)">Расширения → Apps Script</strong></li>
+      <li>Вставьте код ниже в редактор (замените всё содержимое)</li>
+      <li><strong style="color:var(--text)">Развернуть → Новое развёртывание → Веб-приложение</strong></li>
+      <li>Доступ: <strong style="color:var(--accent)">Все (в том числе анонимные пользователи)</strong></li>
+      <li>Скопируйте URL и вставьте в поле выше</li>
+    </ol>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:12px;margin:12px 0;font-family:'DM Mono',monospace;font-size:9px;line-height:1.8;color:var(--text);white-space:pre-wrap;overflow-x:auto">${code}</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="navigator.clipboard.writeText(document.querySelector('.apps-code').textContent);toast('Код скопирован','✅')"
+        class="btn btn-ghost btn-sm">📋 Копировать код</button>
+      <button onclick="this.closest('div[style*=fixed]').remove()" class="btn btn-primary btn-sm">Закрыть</button>
+    </div>
+  </div>`;
+  modal.querySelector('.apps-code') || (()=>{
+    const pre = modal.querySelector('div[style*="white-space:pre"]');
+    if(pre) pre.className='apps-code';
+  })();
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded",async()=>{
+  applyTheme(localStorage.getItem("if_theme")||"dark");
+  document.getElementById("c-date").value=new Date().toISOString().slice(0,10);
+  document.getElementById("rep-date").value=new Date().toISOString().slice(0,10);
+  // Restore Apps Script URL and sheet names
+  const savedUrl = localStorage.getItem('if_apps_script_url')||'';
+  APPS_SCRIPT_URL = savedUrl;
+  const urlInput = document.getElementById('apps-script-url');
+  if(urlInput) urlInput.value = savedUrl;
+
+  GS_SHEET_REG = localStorage.getItem('if_sheet_reg') || 'iikoFiscal';
+  GS_SHEET_SN  = localStorage.getItem('if_sheet_sn')  || 'S/N';
+  const shRegEl = document.getElementById('gs-sheet-reg');
+  const shSnEl  = document.getElementById('gs-sheet-sn');
+  if(shRegEl) shRegEl.value = GS_SHEET_REG;
+  if(shSnEl)  shSnEl.value  = GS_SHEET_SN;
+
+  const ok = await tryAutoLogin();
+  if(ok){ showApp(); }
+  else{ document.getElementById("l-user").focus(); }
+});
+</script>
+</body>
+</html>
